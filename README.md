@@ -173,6 +173,14 @@ npm run build
 
 Le script `postinstall` exécute `prisma generate`, et `npm run build` l'exécute aussi avant `next build` pour sécuriser les builds CI.
 
+Pour Supabase sur Vercel, utilisez `DATABASE_URL` avec le **Transaction Pooler / Supavisor**. Le host direct `db.<project-ref>.supabase.co:5432` peut être IPv6-only et provoquer des erreurs Prisma `Can't reach database server` depuis Vercel.
+
+Exemple:
+
+```env
+DATABASE_URL="postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?schema=neurorecrut&sslmode=require&pgbouncer=true&connection_limit=1"
+```
+
 Ajoutez le domaine `app.neurorecrut.com` dans Vercel, puis configurez le CNAME `app` chez le registrar/DNS selon l'instruction donnée par Vercel.
 
 ### Stripe production
