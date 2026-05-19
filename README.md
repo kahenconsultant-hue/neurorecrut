@@ -178,7 +178,7 @@ Pour Supabase sur Vercel, utilisez `DATABASE_URL` avec le **Transaction Pooler /
 Exemple:
 
 ```env
-DATABASE_URL="postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?schema=neurorecrut&sslmode=require&pgbouncer=true&connection_limit=1"
+DATABASE_URL="postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?schema=neurorecrut&sslmode=require&pgbouncer=true&connection_limit=10&pool_timeout=20"
 ```
 
 Ajoutez le domaine `app.neurorecrut.com` dans Vercel, puis configurez le CNAME `app` chez le registrar/DNS selon l'instruction donnée par Vercel.
