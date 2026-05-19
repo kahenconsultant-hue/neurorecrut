@@ -1,0 +1,432 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  COMPANY
+  CANDIDATE
+}
+
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum JobStatus {
+  DRAFT
+  TARGET_PROFILE_GENERATED
+  EVALUATION_GENERATED
+  INVITATIONS_SENT
+  ARCHIVED
+}
+
+enum InvitationStatus {
+  INVITED
+  STARTED
+  COMPLETED
+  EXPIRED
+}
+
+enum PurchaseStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
+  REFUNDED
+}
+
+enum EvaluationStatus {
+  DRAFT
+  GENERATED
+  ARCHIVED
+}
+
+enum AiLogStatus {
+  SUCCESS
+  ERROR
+}
+
+enum AiPurpose {
+  TARGET_PROFILE
+  EVALUATION_GENERATION
+  CANDIDATE_ANALYSIS
+  HR_REPORT
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id           String    @id @default(cuid())
+  uid          String    @unique @default(cuid())
+  email        String    @unique
+  name         String?
+  passwordHash String
+  role         Role      @default(COMPANY)
+  companyId    String?
+  candidateId  String?   @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  company      Company?  @relation(fields: [companyId], references: [id])
+  candidate    Candidate? @relation(fields: [candidateId], references: [id])
+  generatedEvaluations Evaluation[] @relation("GeneratedBy")
+  createdInvitations   EvaluationInvitation[] @relation("CreatedInvitations")
+  auditLogs     AuditLog[]
+
+  @@index([role])
+  @@index([companyId])
+}
+
+model Company {
+  id                  String        @id @default(cuid())
+  uid                 String        @unique @default(cuid())
+  ownerEmail          String?
+  name                String?
+  siretSiren          String?
+  sector              String?
+  size                String?
+  website             String?
+  address             String?
+  hrContactName       String?
+  hrContactEmail      String?
+  culture             String?
+  values              String?
+  managementStyle     String?
+  teamWorkingStyle    String?
+  workEnvironment     String?
+  status              CompanyStatus @default(ACTIVE)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  users               User[]
+  jobs                JobPosition[]
+  purchases           Purchase[]
+  creditBalances      CreditBalance[]
+  evaluations         Evaluation[]
+  candidates          Candidate[]
+  invitations         EvaluationInvitation[]
+  responses           CandidateResponse[]
+  reports             AnalysisReport[]
+  aiLogs              AiLog[]
+  auditLogs           AuditLog[]
+
+  @@index([status])
+}
+
+model JobPosition {
+  id                          String    @id @default(cuid())
+  uid                         String    @unique @default(cuid())
+  companyId                   String
+  title                       String
+  description                 String
+  mainMissions                String
+  hardSkillsRequired          String
+  seniorityLevel              String
+  contractType                String
+  location                    String
+  workMode                    String
+  teamContext                 String
+  managerProfile              String
+  managementStyle             String
+  workRhythm                  String
+  mainConstraints             String
+  expectedPerformanceIndicators String
+  companySpecificExpectations String
+  softSkillMatrix             Json
+  targetProfile               Json?
+  targetProfileGeneratedAt    DateTime?
+  status                      JobStatus @default(DRAFT)
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+
+  company                     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  purchases                   Purchase[]
+  creditBalances              CreditBalance[]
+  evaluations                 Evaluation[]
+  invitations                 EvaluationInvitation[]
+  responses                   CandidateResponse[]
+  reports                     AnalysisReport[]
+  aiLogs                      AiLog[]
+
+  @@index([companyId])
+  @@index([status])
+}
+
+model PricingPlan {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  name            String
+  description     String?
+  priceCents      Int
+  currency        String   @default("eur")
+  credits         Int
+  jobScoped       Boolean  @default(true)
+  monthly         Boolean  @default(false)
+  stripePriceId   String?
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  purchases       Purchase[]
+  creditBalances  CreditBalance[]
+}
+
+model Purchase {
+  id                      String         @id @default(cuid())
+  uid                     String         @unique @default(cuid())
+  companyId               String
+  jobId                   String?
+  planId                  String
+  stripeCheckoutSessionId String?        @unique
+  stripePaymentIntentId   String?
+  stripeSubscriptionId    String?
+  amountCents             Int
+  currency                String         @default("eur")
+  creditsPurchased        Int
+  status                  PurchaseStatus @default(PENDING)
+  createdAt               DateTime       @default(now())
+  paidAt                  DateTime?
+  updatedAt               DateTime       @updatedAt
+
+  company                 Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job                     JobPosition?   @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  plan                    PricingPlan    @relation(fields: [planId], references: [id])
+  creditBalance           CreditBalance?
+
+  @@index([companyId])
+  @@index([jobId])
+  @@index([status])
+}
+
+model CreditBalance {
+  id                   String      @id @default(cuid())
+  uid                  String      @unique @default(cuid())
+  companyId            String
+  jobId                String?
+  planId               String?
+  purchaseId           String?     @unique
+  creditsPurchased     Int
+  creditsUsed          Int         @default(0)
+  monthlyLimit         Int?
+  periodStart          DateTime?
+  periodEnd            DateTime?
+  stripeSubscriptionId String?
+  active               Boolean     @default(true)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  company              Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job                  JobPosition? @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  plan                 PricingPlan? @relation(fields: [planId], references: [id])
+  purchase             Purchase?   @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([jobId])
+  @@index([active])
+}
+
+model Evaluation {
+  id              String           @id @default(cuid())
+  uid             String           @unique @default(cuid())
+  companyId       String
+  jobId           String
+  language        String           @default("fr")
+  version         String           @default("NeuroRecrut Ultra MVP v1")
+  status          EvaluationStatus @default(GENERATED)
+  json            Json
+  generatedByUserId String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job             JobPosition      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  generatedBy     User?            @relation("GeneratedBy", fields: [generatedByUserId], references: [id], onDelete: SetNull)
+  invitations     EvaluationInvitation[]
+  responses       CandidateResponse[]
+  reports         AnalysisReport[]
+
+  @@index([companyId])
+  @@index([jobId])
+}
+
+model Candidate {
+  id                 String   @id @default(cuid())
+  uid                String   @unique @default(cuid())
+  companyId          String?
+  firstName          String?
+  lastName           String?
+  email              String
+  phone              String?
+  linkedin           String?
+  cvUrl              String?
+  currentRole        String?
+  experienceYears    Int?
+  education          String?
+  availability       String?
+  mobility           String?
+  salaryExpectations String?
+  motivation         String?
+  workPreferences    String?
+  resumeJson         Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user               User?
+  company            Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  invitations        EvaluationInvitation[]
+  responses          CandidateResponse[]
+  reports            AnalysisReport[]
+
+  @@index([email])
+  @@index([companyId])
+}
+
+model EvaluationInvitation {
+  id             String           @id @default(cuid())
+  uid            String           @unique @default(cuid())
+  companyId      String
+  jobId          String
+  evaluationId   String
+  candidateId    String?
+  candidateEmail String
+  status         InvitationStatus @default(INVITED)
+  expiresAt      DateTime
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdByUserId String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  company        Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job            JobPosition      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  evaluation     Evaluation       @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  candidate      Candidate?       @relation(fields: [candidateId], references: [id], onDelete: SetNull)
+  createdBy      User?            @relation("CreatedInvitations", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  response       CandidateResponse?
+
+  @@index([companyId])
+  @@index([jobId])
+  @@index([evaluationId])
+  @@index([status])
+  @@index([candidateEmail])
+}
+
+model CandidateResponse {
+  id             String    @id @default(cuid())
+  uid            String    @unique @default(cuid())
+  candidateId    String
+  companyId      String
+  jobId          String
+  evaluationId   String
+  invitationId   String    @unique
+  answersJson    Json
+  draftJson      Json?
+  isSubmitted    Boolean   @default(false)
+  submittedAt    DateTime?
+  lockedAt       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  candidate      Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  company        Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job            JobPosition @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  evaluation     Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  invitation     EvaluationInvitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  report         AnalysisReport?
+  aiLogs         AiLog[]
+
+  @@index([candidateId])
+  @@index([companyId])
+  @@index([jobId])
+  @@index([evaluationId])
+  @@index([isSubmitted])
+}
+
+model AnalysisReport {
+  id              String    @id @default(cuid())
+  uid             String    @unique @default(cuid())
+  companyId       String
+  jobId           String
+  evaluationId    String
+  candidateId     String
+  responseId      String    @unique
+  analysisJson    Json
+  reportJson      Json
+  pdfBuffer       Bytes?
+  pdfFileName     String?
+  globalScore     Float
+  matchingScore   Float
+  coherenceIndex  Float
+  sincerityIndex  Float
+  riskLevel       RiskLevel
+  recommendation  String
+  finalOpinion    String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job             JobPosition @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  evaluation      Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  candidate       Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  response        CandidateResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([jobId])
+  @@index([matchingScore])
+  @@index([riskLevel])
+}
+
+model AiLog {
+  id          String      @id @default(cuid())
+  uid         String      @unique @default(cuid())
+  purpose     AiPurpose
+  status      AiLogStatus
+  model       String
+  companyId   String?
+  jobId       String?
+  responseId  String?
+  prompt      String
+  requestJson Json?
+  responseJson Json?
+  error       String?
+  latencyMs   Int?
+  createdAt   DateTime    @default(now())
+
+  company     Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  job         JobPosition? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  response    CandidateResponse? @relation(fields: [responseId], references: [id], onDelete: SetNull)
+
+  @@index([purpose])
+  @@index([status])
+  @@index([companyId])
+  @@index([jobId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  uid        String   @unique @default(cuid())
+  userId     String?
+  companyId  String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  company    Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([entityType])
+}
