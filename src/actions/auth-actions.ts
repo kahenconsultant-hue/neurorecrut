@@ -24,6 +24,21 @@ function accepted(formData: FormData, key: string) {
   return formData.get(key) === "yes" || formData.get(key) === "on";
 }
 
+function normalizeCompanyName(value: string | null | undefined) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeSiren(value: string | null | undefined) {
+  return String(value ?? "").replace(/\D/g, "");
+}
+
 export async function registerCompanyUser(_: unknown, formData: FormData) {
   const accountResult = registerSchema.safeParse({
     name: formData.get("name"),
@@ -67,26 +82,52 @@ export async function registerCompanyUser(_: unknown, formData: FormData) {
     redirect("/register?error=exists");
   }
 
+  const companyNameKey = normalizeCompanyName(profile.name);
+  const sirenKey = normalizeSiren(profile.siretSiren);
+  const existingCompanies = await prisma.company.findMany({
+    select: { name: true, siretSiren: true }
+  });
+  const duplicateCompany = existingCompanies.some((company) => {
+    return normalizeCompanyName(company.name) === companyNameKey || normalizeSiren(company.siretSiren) === sirenKey;
+  });
+  if (duplicateCompany) {
+    redirect("/register?error=duplicate_company");
+  }
+
   try {
     const passwordHash = await bcrypt.hash(parsed.password, 12);
 
-    const company = await prisma.company.create({
-      data: {
-        ...profile,
-        website: profile.website || null,
-        ownerEmail: email,
-        hrContactEmail: profile.hrContactEmail.toLowerCase()
-      }
-    });
+    const company = await prisma.$transaction(async (tx) => {
+      const createdCompany = await tx.company.create({
+        data: {
+          ...profile,
+          website: profile.website || null,
+          ownerEmail: email,
+          hrContactEmail: profile.hrContactEmail.toLowerCase()
+        }
+      });
 
-    await prisma.user.create({
-      data: {
-        email,
-        name: parsed.name,
-        passwordHash,
-        role: Role.COMPANY,
-        companyId: company.id
-      }
+      await tx.user.create({
+        data: {
+          email,
+          name: parsed.name,
+          passwordHash,
+          role: Role.COMPANY,
+          companyId: createdCompany.id
+        }
+      });
+
+      await tx.creditBalance.create({
+        data: {
+          companyId: createdCompany.id,
+          creditsPurchased: 1,
+          creditsUsed: 0,
+          active: true,
+          periodStart: new Date()
+        }
+      });
+
+      return createdCompany;
     });
 
     await sendCompanyWelcomeEmail({

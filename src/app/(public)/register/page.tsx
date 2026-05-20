@@ -6,6 +6,7 @@ import { COMPANY_PROFILE_CHOICE_GROUPS, COMPANY_SECTOR_OPTIONS, COMPANY_SIZE_OPT
 
 const errorMessages: Record<string, string> = {
   exists: "Un compte existe déjà avec cet email.",
+  duplicate_company: "Une entreprise existe déjà avec ce nom ou ce SIRET / SIREN.",
   database: "Base de données indisponible. Vérifiez DATABASE_URL puis lancez les migrations Prisma.",
   validation: "Tous les champs obligatoires du compte et du profil entreprise doivent être complétés.",
   password_mismatch: "Les deux mots de passe doivent être identiques.",

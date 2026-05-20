@@ -69,8 +69,8 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                     <form action={toggleCompanyStatus.bind(null, company.uid)}>
                       <button className="btn-secondary" type="submit">Activer/désactiver</button>
                     </form>
-                    <form action={manuallyAddCredits.bind(null, company.uid, 5)}>
-                      <button className="btn-secondary" type="submit">+5 crédits</button>
+                    <form action={manuallyAddCredits.bind(null, company.uid, 1)}>
+                      <button className="btn-secondary" type="submit">+1 crédit</button>
                     </form>
                   </div>
                 </td>

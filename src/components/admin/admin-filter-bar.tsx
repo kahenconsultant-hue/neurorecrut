@@ -28,8 +28,8 @@ export function AdminFilterBar({
 }: AdminFilterBarProps) {
   return (
     <section className="panel p-4">
-      <form className="grid gap-3 lg:grid-cols-[minmax(220px,1.4fr)_repeat(4,minmax(150px,1fr))_auto]">
-        <label className="lg:col-span-2">
+      <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-6 2xl:grid-cols-8">
+        <label className="md:col-span-2 xl:col-span-2">
           <span className="label">Recherche</span>
           <input className="field" name="q" defaultValue={getParam(searchParams, "q")} placeholder={placeholder} />
         </label>
@@ -61,11 +61,11 @@ export function AdminFilterBar({
           </>
         ) : null}
 
-        <div className="flex items-end gap-2">
+        <div className="flex min-w-0 items-end gap-2 md:col-span-2 xl:col-span-2 2xl:col-span-1">
           <button className="btn-primary min-h-10 flex-1" type="submit">
             Filtrer
           </button>
-          <Link className="btn-secondary min-h-10" href={resetHref}>
+          <Link className="btn-secondary min-h-10 flex-1" href={resetHref}>
             Réinitialiser
           </Link>
         </div>
