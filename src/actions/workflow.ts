@@ -24,6 +24,7 @@ import { callJsonAi } from "@/lib/ai/client";
 import { fallbackEvaluation, fallbackHrReport, fallbackQualitativeAnalysis, fallbackTargetProfile } from "@/lib/ai/fallbacks";
 import { calculateScores } from "@/lib/scoring/scoring-engine";
 import { createReportPdfBuffer, type ReportPdfMetadata } from "@/lib/pdf/report-pdf";
+import { sendCandidateInvitationEmail, sendCandidateSubmissionEmail, sendReportReadyEmail } from "@/lib/email";
 import type { CandidateAnswersJson, EvaluationJson } from "@/types/evaluation";
 
 function formString(formData: FormData, key: string) {
@@ -530,6 +531,14 @@ export async function createCandidateInvitation(jobUid: string, _: unknown, form
     data: { status: "INVITATIONS_SENT" }
   });
 
+  await sendCandidateInvitationEmail({
+    to: invitation.candidateEmail,
+    companyName: job.company.name,
+    jobTitle: job.title,
+    invitationUid: invitation.uid,
+    expiresAt: invitation.expiresAt
+  });
+
   revalidatePath(`/company/jobs/${jobUid}/invite`);
   return invitation.uid;
 }
@@ -766,6 +775,13 @@ export async function submitCandidateResponse(invitationUid: string, payload: un
     return saved;
   });
 
+  await sendCandidateSubmissionEmail({
+    to: invitation.candidate?.email ?? invitation.candidateEmail,
+    firstName: invitation.candidate?.firstName,
+    companyName: invitation.company.name,
+    jobTitle: invitation.job.title
+  });
+
   await analyzeCandidateResponse(response.uid);
   return { ok: true };
 }
@@ -844,7 +860,7 @@ export async function analyzeCandidateResponse(responseUid: string) {
   };
   const pdfBuffer = await generateReportPdf(reportJson, analysisJson, reportMetadata);
 
-  return prisma.analysisReport.create({
+  const report = await prisma.analysisReport.create({
     data: {
       uid: `report_${randomUUID()}`,
       companyId: response.companyId,
@@ -865,6 +881,18 @@ export async function analyzeCandidateResponse(responseUid: string) {
       finalOpinion: scores.final_opinion
     }
   });
+
+  await sendReportReadyEmail({
+    to: [response.job.company.hrContactEmail, response.job.company.ownerEmail],
+    candidateName: [response.candidate.firstName, response.candidate.lastName].filter(Boolean).join(" ") || response.candidate.email,
+    companyName: response.job.company.name,
+    jobTitle: response.job.title,
+    reportUid: report.uid,
+    matchingScore: report.matchingScore,
+    riskLevel: report.riskLevel
+  });
+
+  return report;
 }
 
 export async function generateHrReport(analysisJson: Record<string, unknown>, companyId?: string, jobId?: string, responseId?: string) {

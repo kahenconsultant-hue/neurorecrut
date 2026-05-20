@@ -31,6 +31,12 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 OPENAI_API_KEY=""
 STRIPE_SECRET_KEY=""
 STRIPE_WEBHOOK_SECRET=""
+SMTP_HOST=""
+SMTP_PORT="587"
+SMTP_USER=""
+SMTP_PASSWORD=""
+SMTP_SECURE="false"
+EMAIL_FROM="NeuroRecrut <no-reply@neurorecrut.com>"
 ```
 
 ## Base de données
@@ -198,6 +204,28 @@ checkout.session.completed
 ```
 
 Copiez le secret `whsec_...` dans `STRIPE_WEBHOOK_SECRET`.
+
+### Emails transactionnels
+
+NeuroRecrut envoie les notifications via SMTP:
+
+- creation de compte entreprise et candidat
+- invitation candidat a une evaluation
+- confirmation de soumission candidat
+- rapport candidat disponible pour l'entreprise
+
+Variables requises en production:
+
+```env
+SMTP_HOST="smtp-relay.brevo.com"
+SMTP_PORT="587"
+SMTP_USER="your-smtp-login"
+SMTP_PASSWORD="your-smtp-key"
+SMTP_SECURE="false"
+EMAIL_FROM="NeuroRecrut <no-reply@neurorecrut.com>"
+```
+
+Si ces variables ne sont pas configurees, les emails sont ignores proprement et le workflow applicatif continue.
 
 ## Routes clés
 

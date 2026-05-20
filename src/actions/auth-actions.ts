@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { sendCandidateWelcomeEmail, sendCompanyWelcomeEmail } from "@/lib/email";
 import { candidateRegisterSchema, companyProfileSchema, registerSchema } from "@/lib/validators";
 
 function formText(formData: FormData, key: string) {
@@ -79,6 +80,12 @@ export async function registerCompanyUser(_: unknown, formData: FormData) {
         companyId: company.id
       }
     });
+
+    await sendCompanyWelcomeEmail({
+      to: [email, company.hrContactEmail],
+      name: parsed.name,
+      companyName: company.name
+    });
   } catch {
     redirect("/register?error=database");
   }
@@ -126,6 +133,11 @@ export async function registerCandidateUser(_: unknown, formData: FormData) {
         role: Role.CANDIDATE,
         candidateId: candidate.id
       }
+    });
+
+    await sendCandidateWelcomeEmail({
+      to: email,
+      firstName: parsed.firstName
     });
   } catch {
     redirect("/candidate/register?error=database");
