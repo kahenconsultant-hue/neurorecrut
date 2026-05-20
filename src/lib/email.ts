@@ -30,6 +30,15 @@ type CandidateInvitationInput = {
   expiresAt: Date;
 };
 
+type CompanyInvitationConfirmationInput = {
+  to: EmailAddress[];
+  candidateEmail: string;
+  companyName?: string | null;
+  jobTitle: string;
+  jobUid: string;
+  expiresAt: Date;
+};
+
 type CandidateSubmissionInput = {
   to: EmailAddress;
   firstName?: string | null;
@@ -197,15 +206,43 @@ export async function sendCandidateWelcomeEmail({ to, firstName }: CandidateWelc
 export async function sendCandidateInvitationEmail({ to, companyName, jobTitle, invitationUid, expiresAt }: CandidateInvitationInput) {
   const appUrl = getAppUrl();
   const href = `${appUrl}/candidate/start/${invitationUid}`;
+  const companyLabel = companyName?.trim() || "l'entreprise recruteuse";
   const title = "Invitation à une évaluation NeuroRecrut";
-  const body = `<p>Vous êtes invité(e) à compléter une évaluation pour le poste <strong>${escapeHtml(jobTitle)}</strong>${companyName ? ` chez <strong>${escapeHtml(companyName)}</strong>` : ""}.</p>
-<p>Cette invitation est valable jusqu'au ${escapeHtml(formatDate(expiresAt))}. L'évaluation est contextualisée au poste et vos réponses restent confidentielles côté candidat.</p>`;
+  const body = `<p>Vous êtes invité(e) par <strong>${escapeHtml(companyLabel)}</strong> à compléter une évaluation pour le poste <strong>${escapeHtml(jobTitle)}</strong>.</p>
+<p>Cette invitation est valable jusqu'au <strong>${escapeHtml(formatDate(expiresAt))}</strong>. L'évaluation est contextualisée au poste, à l'entreprise et à son environnement de travail.</p>
+<p>Vos réponses restent confidentielles côté candidat et ne révèlent pas la logique de scoring.</p>`;
 
   return sendEmail({
     to: to ?? "",
-    subject: `Invitation NeuroRecrut - ${jobTitle}`,
-    text: `Vous êtes invité(e) à compléter l'évaluation NeuroRecrut pour ${jobTitle}. Lien: ${href}`,
+    subject: `Invitation NeuroRecrut - ${companyLabel} - ${jobTitle}`,
+    text: `Vous êtes invité(e) par ${companyLabel} à compléter l'évaluation NeuroRecrut pour ${jobTitle}. Invitation valable jusqu'au ${formatDate(expiresAt)}. Lien: ${href}`,
     html: emailShell(title, body, { label: "Commencer l'évaluation", href })
+  });
+}
+
+export async function sendCompanyInvitationConfirmationEmail({
+  to,
+  candidateEmail,
+  companyName,
+  jobTitle,
+  jobUid,
+  expiresAt
+}: CompanyInvitationConfirmationInput) {
+  const appUrl = getAppUrl();
+  const href = `${appUrl}/company/jobs/${jobUid}/invite`;
+  const companyLabel = companyName?.trim() || "votre entreprise";
+  const title = "Invitation candidat envoyée";
+  const body = `<p>L'invitation NeuroRecrut a bien été envoyée au candidat <strong>${escapeHtml(candidateEmail)}</strong>.</p>
+<p>Entreprise: <strong>${escapeHtml(companyLabel)}</strong><br />
+Poste: <strong>${escapeHtml(jobTitle)}</strong><br />
+Date limite de réponse: <strong>${escapeHtml(formatDate(expiresAt))}</strong></p>
+<p>Le candidat pourra accéder à l'évaluation depuis son espace candidat ou depuis le lien sécurisé reçu par email.</p>`;
+
+  return sendEmail({
+    to: uniqueRecipients(to),
+    subject: `Invitation envoyée - ${candidateEmail} - ${jobTitle}`,
+    text: `Invitation envoyée à ${candidateEmail} pour ${jobTitle} (${companyLabel}). Date limite: ${formatDate(expiresAt)}. Suivi: ${href}`,
+    html: emailShell(title, body, { label: "Voir les invitations", href })
   });
 }
 

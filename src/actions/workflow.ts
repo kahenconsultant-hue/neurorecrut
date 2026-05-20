@@ -24,7 +24,12 @@ import { callJsonAi } from "@/lib/ai/client";
 import { fallbackEvaluation, fallbackHrReport, fallbackQualitativeAnalysis, fallbackTargetProfile } from "@/lib/ai/fallbacks";
 import { calculateScores } from "@/lib/scoring/scoring-engine";
 import { createReportPdfBuffer, type ReportPdfMetadata } from "@/lib/pdf/report-pdf";
-import { sendCandidateInvitationEmail, sendCandidateSubmissionEmail, sendReportReadyEmail } from "@/lib/email";
+import {
+  sendCandidateInvitationEmail,
+  sendCandidateSubmissionEmail,
+  sendCompanyInvitationConfirmationEmail,
+  sendReportReadyEmail
+} from "@/lib/email";
 import type { CandidateAnswersJson, EvaluationJson } from "@/types/evaluation";
 
 function formString(formData: FormData, key: string) {
@@ -521,7 +526,7 @@ export async function createCandidateInvitation(jobUid: string, _: unknown, form
       evaluationId: evaluation.id,
       candidateId: candidate?.id,
       candidateEmail: lower(parsed.candidateEmail),
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14),
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3),
       createdByUserId: (await requireAuth()).user.id
     }
   });
@@ -539,12 +544,21 @@ export async function createCandidateInvitation(jobUid: string, _: unknown, form
     expiresAt: invitation.expiresAt
   });
 
+  await sendCompanyInvitationConfirmationEmail({
+    to: [job.company.hrContactEmail, job.company.ownerEmail],
+    candidateEmail: invitation.candidateEmail,
+    companyName: job.company.name,
+    jobTitle: job.title,
+    jobUid: job.uid,
+    expiresAt: invitation.expiresAt
+  });
+
   revalidatePath(`/company/jobs/${jobUid}/invite`);
   return invitation.uid;
 }
 
 export async function createCandidateInvitationFromForm(formData: FormData) {
-  const jobUid = formText(formData, "jobUid");
+  const jobUid = formString(formData, "jobUid");
   if (!jobUid) throw new Error("Poste introuvable");
   await createCandidateInvitation(jobUid, null, formData);
 }
