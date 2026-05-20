@@ -543,6 +543,12 @@ export async function createCandidateInvitation(jobUid: string, _: unknown, form
   return invitation.uid;
 }
 
+export async function createCandidateInvitationFromForm(formData: FormData) {
+  const jobUid = formText(formData, "jobUid");
+  if (!jobUid) throw new Error("Poste introuvable");
+  await createCandidateInvitation(jobUid, null, formData);
+}
+
 export async function validateInvitation(invitationUid: string, options?: { allowSubmitted?: boolean }) {
   const invitation = await prisma.evaluationInvitation.findUnique({
     where: { uid: invitationUid },

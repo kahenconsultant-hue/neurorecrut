@@ -26,6 +26,7 @@ Créez ensuite un fichier `.env` à partir de `.env.example`.
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/neurorecrut?schema=public"
 NEXTAUTH_SECRET="replace-me-with-a-long-random-secret"
+NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=""
 NEXTAUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 OPENAI_API_KEY=""
@@ -142,7 +143,10 @@ Exemple pour `app.neurorecrut.com`:
 ```env
 NEXTAUTH_URL="https://app.neurorecrut.com"
 NEXT_PUBLIC_APP_URL="https://app.neurorecrut.com"
+NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="stable-32-byte-base64-key"
 ```
+
+`NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` doit rester stable entre deux deploiements production pour eviter qu'un formulaire ouvert avant un redeploiement echoue au premier submit.
 
 En production, appliquez les migrations avec:
 

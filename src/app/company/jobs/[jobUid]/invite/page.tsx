@@ -1,4 +1,4 @@
-import { createCandidateInvitation } from "@/actions/workflow";
+import { createCandidateInvitationFromForm } from "@/actions/workflow";
 import { prisma } from "@/lib/prisma";
 import { requireCompanyUser } from "@/lib/security";
 import { Badge } from "@/components/ui/badge";
@@ -21,11 +21,6 @@ export default async function InvitePage({ params }: { params: { jobUid: string 
   });
   const remaining = usableCredits.reduce((sum, item) => sum + item.creditsPurchased - item.creditsUsed, 0);
 
-  async function invite(formData: FormData) {
-    "use server";
-    await createCandidateInvitation(params.jobUid, null, formData);
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -35,7 +30,8 @@ export default async function InvitePage({ params }: { params: { jobUid: string 
           Le candidat retrouvera automatiquement l&apos;évaluation dans son espace candidat lorsque son compte utilise cet email.
         </p>
       </div>
-      <form action={invite} className="panel flex flex-col gap-4 p-5 md:flex-row md:items-end">
+      <form action={createCandidateInvitationFromForm} className="panel flex flex-col gap-4 p-5 md:flex-row md:items-end">
+        <input type="hidden" name="jobUid" value={params.jobUid} />
         <div className="flex-1">
           <label className="label" htmlFor="candidateEmail">Email candidat</label>
           <input className="field" id="candidateEmail" name="candidateEmail" type="email" required />
