@@ -17,7 +17,7 @@ export default async function ComparisonPage({ params }: { params: { jobUid: str
       </div>
       <CandidateComparisonCharts reports={reports} />
       <section className="panel overflow-hidden">
-        <table className="w-full text-left text-sm">
+        <table className="responsive-table">
           <thead className="bg-mist text-gray-500">
             <tr>
               <th className="px-5 py-3">Rang</th>
@@ -33,18 +33,18 @@ export default async function ComparisonPage({ params }: { params: { jobUid: str
           <tbody>
             {reports.map((report, index) => (
               <tr key={report.id} className="border-t border-line">
-                <td className="px-5 py-3">{index + 1}</td>
-                <td className="px-5 py-3">
+                <td className="px-5 py-3" data-label="Rang">{index + 1}</td>
+                <td className="px-5 py-3" data-label="Candidat">
                   <Link href={`/company/reports/${report.uid}`} className="font-semibold text-ink hover:text-coral">
                     {report.candidate.firstName} {report.candidate.lastName}
                   </Link>
                 </td>
-                <td className="px-5 py-3">{Math.round(report.globalScore)}</td>
-                <td className="px-5 py-3">{Math.round(report.matchingScore)}</td>
-                <td className="px-5 py-3">{Math.round(report.coherenceIndex)}</td>
-                <td className="px-5 py-3">{Math.round(report.sincerityIndex)}</td>
-                <td className="px-5 py-3"><Badge value={report.riskLevel} /></td>
-                <td className="px-5 py-3">{report.recommendation}</td>
+                <td className="px-5 py-3" data-label="Global">{Math.round(report.globalScore)}</td>
+                <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}</td>
+                <td className="px-5 py-3" data-label="Cohérence">{Math.round(report.coherenceIndex)}</td>
+                <td className="px-5 py-3" data-label="Sincérité">{Math.round(report.sincerityIndex)}</td>
+                <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>
+                <td className="px-5 py-3" data-label="Recommandation">{report.recommendation}</td>
               </tr>
             ))}
           </tbody>

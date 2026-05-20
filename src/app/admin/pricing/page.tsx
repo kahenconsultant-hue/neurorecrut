@@ -70,7 +70,7 @@ export default async function AdminPricingPage() {
           <h2 className="font-semibold text-ink">Soldes de crédits</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table">
             <thead className="bg-mist text-gray-500">
               <tr>
                 <th className="px-5 py-3">Entreprise</th>
@@ -85,13 +85,13 @@ export default async function AdminPricingPage() {
             <tbody>
               {data.creditBalances.map((balance) => (
                 <tr key={balance.id} className="border-t border-line align-top">
-                  <td className="px-5 py-3"><Link href={`/admin/companies/${balance.company.uid}`} className="font-semibold text-ink hover:text-coral">{balance.company.name ?? balance.company.uid}</Link></td>
-                  <td className="px-5 py-3">{balance.job ? <Link href={`/admin/jobs/${balance.job.uid}`} className="hover:text-coral">{balance.job.title}</Link> : "Global"}</td>
-                  <td className="px-5 py-3">{balance.plan?.name ?? "-"}</td>
-                  <td className="px-5 py-3">{balance.creditsPurchased - balance.creditsUsed}/{balance.creditsPurchased}</td>
-                  <td className="px-5 py-3 text-xs text-gray-600">{formatDate(balance.periodStart)} → {formatDate(balance.periodEnd)}</td>
-                  <td className="px-5 py-3"><Badge value={balance.active ? "ACTIVE" : "INACTIVE"} /></td>
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3" data-label="Entreprise"><Link href={`/admin/companies/${balance.company.uid}`} className="font-semibold text-ink hover:text-coral">{balance.company.name ?? balance.company.uid}</Link></td>
+                  <td className="px-5 py-3" data-label="Poste">{balance.job ? <Link href={`/admin/jobs/${balance.job.uid}`} className="hover:text-coral">{balance.job.title}</Link> : "Global"}</td>
+                  <td className="px-5 py-3" data-label="Plan">{balance.plan?.name ?? "-"}</td>
+                  <td className="px-5 py-3" data-label="Crédits">{balance.creditsPurchased - balance.creditsUsed}/{balance.creditsPurchased}</td>
+                  <td className="px-5 py-3 text-xs text-gray-600" data-label="Période">{formatDate(balance.periodStart)} → {formatDate(balance.periodEnd)}</td>
+                  <td className="px-5 py-3" data-label="Statut"><Badge value={balance.active ? "ACTIVE" : "INACTIVE"} /></td>
+                  <td className="px-5 py-3" data-label="Modifier">
                     <form action={updateAdminCreditBalance.bind(null, balance.uid)} className="grid min-w-[420px] grid-cols-5 gap-2">
                       <input className="field" name="creditsPurchased" type="number" defaultValue={balance.creditsPurchased} aria-label="Crédits achetés" />
                       <input className="field" name="creditsUsed" type="number" defaultValue={balance.creditsUsed} aria-label="Crédits utilisés" />

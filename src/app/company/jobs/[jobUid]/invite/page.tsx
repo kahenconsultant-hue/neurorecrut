@@ -41,17 +41,17 @@ export default async function InvitePage({ params }: { params: { jobUid: string 
       <section className="panel overflow-hidden">
         <div className="border-b border-line p-5"><h2 className="font-semibold">Invitations</h2></div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table">
             <thead className="bg-mist text-gray-500">
               <tr><th className="px-5 py-3">Email</th><th className="px-5 py-3">Statut</th><th className="px-5 py-3">Expire</th><th className="px-5 py-3">Accès candidat</th></tr>
             </thead>
             <tbody>
               {job.invitations.map((invitation) => (
                 <tr key={invitation.id} className="border-t border-line">
-                  <td className="px-5 py-3">{invitation.candidateEmail}</td>
-                  <td className="px-5 py-3"><Badge value={invitation.status} /></td>
-                  <td className="px-5 py-3">{formatDate(invitation.expiresAt)}</td>
-                  <td className="px-5 py-3 text-gray-600">Disponible dans l&apos;espace candidat</td>
+                  <td className="px-5 py-3" data-label="Email">{invitation.candidateEmail}</td>
+                  <td className="px-5 py-3" data-label="Statut"><Badge value={invitation.status} /></td>
+                  <td className="px-5 py-3" data-label="Expire">{formatDate(invitation.expiresAt)}</td>
+                  <td className="px-5 py-3 text-gray-600" data-label="Accès candidat">Disponible dans l&apos;espace candidat</td>
                 </tr>
               ))}
             </tbody>

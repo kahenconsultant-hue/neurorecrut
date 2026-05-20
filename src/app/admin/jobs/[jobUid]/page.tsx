@@ -122,14 +122,14 @@ export default async function AdminJobDetailPage({ params, searchParams }: { par
 
       <section className="panel overflow-hidden">
         <div className="border-b border-line px-5 py-4"><h2 className="font-semibold text-ink">Réponses candidates</h2></div>
-        <table className="w-full text-left text-sm">
+        <table className="responsive-table">
           <tbody>
             {job.responses.map((response) => (
               <tr key={response.id} className="border-t border-line">
-                <td className="px-5 py-3"><Link href={`/admin/responses/${response.uid}`} className="font-semibold text-ink hover:text-coral">{response.uid}</Link></td>
-                <td className="px-5 py-3"><Link href={`/admin/candidates/${response.candidate.uid}`} className="hover:text-coral">{response.candidate.email}</Link></td>
-                <td className="px-5 py-3"><Badge value={response.isSubmitted ? "COMPLETED" : "DRAFT"} /></td>
-                <td className="px-5 py-3">{response.report ? <Link href={`/admin/reports/${response.report.uid}`} className="text-coral">Rapport</Link> : "-"}</td>
+                <td className="px-5 py-3" data-label="Réponse"><Link href={`/admin/responses/${response.uid}`} className="font-semibold text-ink hover:text-coral">{response.uid}</Link></td>
+                <td className="px-5 py-3" data-label="Candidat"><Link href={`/admin/candidates/${response.candidate.uid}`} className="hover:text-coral">{response.candidate.email}</Link></td>
+                <td className="px-5 py-3" data-label="Statut"><Badge value={response.isSubmitted ? "COMPLETED" : "DRAFT"} /></td>
+                <td className="px-5 py-3" data-label="Rapport">{response.report ? <Link href={`/admin/reports/${response.report.uid}`} className="text-coral">Rapport</Link> : "-"}</td>
               </tr>
             ))}
           </tbody>

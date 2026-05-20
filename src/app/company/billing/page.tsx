@@ -36,13 +36,13 @@ export default async function CompanyBillingPage() {
       </div>
       <section className="panel overflow-hidden">
         <div className="border-b border-line p-5"><h2 className="font-semibold">Balances actives</h2></div>
-        <table className="w-full text-left text-sm">
+        <table className="responsive-table">
           <tbody>
             {credits.map((credit) => (
               <tr key={credit.id} className="border-t border-line">
-                <td className="px-5 py-3">{credit.plan?.name ?? "Crédits manuels"}</td>
-                <td className="px-5 py-3">{credit.job?.title ?? "Global entreprise"}</td>
-                <td className="px-5 py-3">{credit.creditsPurchased - credit.creditsUsed} restants</td>
+                <td className="px-5 py-3" data-label="Plan">{credit.plan?.name ?? "Crédits manuels"}</td>
+                <td className="px-5 py-3" data-label="Poste">{credit.job?.title ?? "Global entreprise"}</td>
+                <td className="px-5 py-3" data-label="Crédits">{credit.creditsPurchased - credit.creditsUsed} restants</td>
               </tr>
             ))}
           </tbody>
@@ -50,15 +50,15 @@ export default async function CompanyBillingPage() {
       </section>
       <section className="panel overflow-hidden">
         <div className="border-b border-line p-5"><h2 className="font-semibold">Achats</h2></div>
-        <table className="w-full text-left text-sm">
+        <table className="responsive-table">
           <tbody>
             {purchases.map((purchase) => (
               <tr key={purchase.id} className="border-t border-line">
-                <td className="px-5 py-3">{purchase.plan.name}</td>
-                <td className="px-5 py-3">{purchase.job?.title ?? "Global"}</td>
-                <td className="px-5 py-3">{formatCurrency(purchase.amountCents)}</td>
-                <td className="px-5 py-3"><Badge value={purchase.status} /></td>
-                <td className="px-5 py-3">{formatDate(purchase.createdAt)}</td>
+                <td className="px-5 py-3" data-label="Offre">{purchase.plan.name}</td>
+                <td className="px-5 py-3" data-label="Poste">{purchase.job?.title ?? "Global"}</td>
+                <td className="px-5 py-3" data-label="Montant">{formatCurrency(purchase.amountCents)}</td>
+                <td className="px-5 py-3" data-label="Statut"><Badge value={purchase.status} /></td>
+                <td className="px-5 py-3" data-label="Date">{formatDate(purchase.createdAt)}</td>
               </tr>
             ))}
           </tbody>

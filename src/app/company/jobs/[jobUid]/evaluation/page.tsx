@@ -97,17 +97,17 @@ export default async function EvaluationPage({ params }: { params: { jobUid: str
               <h2 className="font-semibold text-ink">Rapports liés à cette évaluation</h2>
               <p className="mt-1 text-sm text-gray-600">Les rapports complétés sont accessibles ici et dans la page candidats.</p>
             </div>
-            <table className="w-full text-left text-sm">
+            <table className="responsive-table">
               <thead className="bg-mist text-gray-500">
                 <tr><th className="px-5 py-3">Candidat</th><th className="px-5 py-3">Matching</th><th className="px-5 py-3">Risque</th><th className="px-5 py-3">Rapport</th></tr>
               </thead>
               <tbody>
                 {job.reports.map((report) => (
                   <tr key={report.id} className="border-t border-line">
-                    <td className="px-5 py-3">{report.candidate.firstName} {report.candidate.lastName}</td>
-                    <td className="px-5 py-3">{Math.round(report.matchingScore)}/100</td>
-                    <td className="px-5 py-3"><Badge value={report.riskLevel} /></td>
-                    <td className="px-5 py-3"><Link className="font-semibold text-coral" href={`/company/reports/${report.uid}`}>Ouvrir</Link></td>
+                    <td className="px-5 py-3" data-label="Candidat">{report.candidate.firstName} {report.candidate.lastName}</td>
+                    <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}/100</td>
+                    <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>
+                    <td className="px-5 py-3" data-label="Rapport"><Link className="font-semibold text-coral" href={`/company/reports/${report.uid}`}>Ouvrir</Link></td>
                   </tr>
                 ))}
                 {job.reports.length === 0 ? (

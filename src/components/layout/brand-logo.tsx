@@ -16,10 +16,10 @@ export function BrandLogo({ href = "/", label, compact = false, priority = false
         alt="NeuroRecrut"
         width={230}
         height={81}
-        className={compact ? "h-auto w-36" : "h-auto w-44"}
+        className={compact ? "h-auto w-32 sm:w-36" : "h-auto w-44"}
         priority={priority}
       />
-      {label ? <span className="text-sm font-semibold text-graphite">{label}</span> : null}
+      {label ? <span className="hidden text-sm font-semibold text-graphite min-[380px]:inline">{label}</span> : null}
     </span>
   );
 

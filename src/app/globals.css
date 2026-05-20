@@ -51,4 +51,87 @@ button {
   .panel {
     @apply rounded-lg border border-line bg-white shadow-panel;
   }
+
+  .responsive-table {
+    @apply w-full text-left text-sm;
+  }
+}
+
+@media (max-width: 767px) {
+  main {
+    min-width: 0;
+    padding-bottom: max(5rem, env(safe-area-inset-bottom));
+  }
+
+  .panel {
+    overflow: hidden;
+  }
+
+  .responsive-table thead {
+    display: none;
+  }
+
+  .responsive-table,
+  .responsive-table tbody,
+  .responsive-table tr,
+  .responsive-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .responsive-table tr {
+    border-top: 1px solid #e5e7eb;
+    padding: 0.75rem 0;
+  }
+
+  .responsive-table tbody tr:first-child {
+    border-top: 0;
+  }
+
+  .responsive-table td {
+    display: grid;
+    grid-template-columns: minmax(7rem, 38%) minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: start;
+    border-top: 0 !important;
+    padding: 0.45rem 1rem !important;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .responsive-table td::before {
+    content: attr(data-label);
+    color: #6b7280;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+
+  .responsive-table td:not([data-label])::before,
+  .responsive-table td[data-label=""]::before {
+    content: none;
+  }
+
+  .responsive-table code,
+  .responsive-table .font-mono {
+    white-space: normal;
+    word-break: break-all;
+  }
+
+  .responsive-table form {
+    max-width: 100%;
+    min-width: 0 !important;
+  }
+
+  .responsive-table form.grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .responsive-table td {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
 }

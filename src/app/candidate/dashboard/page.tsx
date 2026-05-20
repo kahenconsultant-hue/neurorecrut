@@ -30,7 +30,7 @@ export default async function CandidateDashboardPage({ searchParams }: { searchP
             <h2 className="font-semibold text-ink">Mes évaluations</h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="responsive-table">
               <thead className="bg-mist text-gray-500">
                 <tr>
                   <th className="px-5 py-3">Poste</th>
@@ -43,11 +43,11 @@ export default async function CandidateDashboardPage({ searchParams }: { searchP
               <tbody>
                 {invitations.map((invitation) => (
                   <tr key={invitation.id} className="border-t border-line">
-                    <td className="px-5 py-3 font-semibold text-ink">{invitation.job.title}</td>
-                    <td className="px-5 py-3">{invitation.job.company.name ?? "Entreprise"}</td>
-                    <td className="px-5 py-3"><Badge value={invitation.status} /></td>
-                    <td className="px-5 py-3">{formatDate(invitation.expiresAt)}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-5 py-3 font-semibold text-ink" data-label="Poste">{invitation.job.title}</td>
+                    <td className="px-5 py-3" data-label="Entreprise">{invitation.job.company.name ?? "Entreprise"}</td>
+                    <td className="px-5 py-3" data-label="Statut"><Badge value={invitation.status} /></td>
+                    <td className="px-5 py-3" data-label="Expire">{formatDate(invitation.expiresAt)}</td>
+                    <td className="px-5 py-3" data-label="Action">
                       {invitation.response?.isSubmitted ? (
                         <span className="text-gray-500">Soumise</span>
                       ) : (

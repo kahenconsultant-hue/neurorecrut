@@ -44,7 +44,7 @@ export default async function AdminDashboardPage() {
             <Link href="/admin/companies" className="text-sm font-semibold text-coral">Tout voir</Link>
           </div>
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="responsive-table">
               <thead className="text-xs uppercase text-gray-500">
                 <tr>
                   <th className="py-2">Entreprise</th>
@@ -56,15 +56,15 @@ export default async function AdminDashboardPage() {
               <tbody>
                 {data.companies.slice(0, 6).map((company) => (
                   <tr key={company.id} className="border-t border-line">
-                    <td className="py-3">
+                    <td className="py-3" data-label="Entreprise">
                       <Link href={`/admin/companies/${company.uid}`} className="font-semibold text-ink hover:text-coral">
                         {company.name ?? company.uid}
                       </Link>
                       <p className="text-xs text-gray-500">{company.ownerEmail ?? company.hrContactEmail ?? "-"}</p>
                     </td>
-                    <td className="py-3">{company._count.jobs}</td>
-                    <td className="py-3">{company._count.reports}</td>
-                    <td className="py-3"><Badge value={company.status} /></td>
+                    <td className="py-3" data-label="Postes">{company._count.jobs}</td>
+                    <td className="py-3" data-label="Rapports">{company._count.reports}</td>
+                    <td className="py-3" data-label="Statut"><Badge value={company.status} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -96,7 +96,7 @@ export default async function AdminDashboardPage() {
           <h2 className="font-semibold text-ink">Derniers rapports générés</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table">
             <thead className="bg-mist text-gray-500">
               <tr>
                 <th className="px-5 py-3">Date</th>
@@ -110,16 +110,16 @@ export default async function AdminDashboardPage() {
             <tbody>
               {data.reports.slice(0, 8).map((report) => (
                 <tr key={report.id} className="border-t border-line">
-                  <td className="px-5 py-3">{formatDate(report.createdAt)}</td>
-                  <td className="px-5 py-3">{report.company.name ?? report.company.uid}</td>
-                  <td className="px-5 py-3">{report.job.title}</td>
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3" data-label="Date">{formatDate(report.createdAt)}</td>
+                  <td className="px-5 py-3" data-label="Entreprise">{report.company.name ?? report.company.uid}</td>
+                  <td className="px-5 py-3" data-label="Poste">{report.job.title}</td>
+                  <td className="px-5 py-3" data-label="Candidat">
                     <Link href={`/admin/reports/${report.uid}`} className="font-semibold text-ink hover:text-coral">
                       {report.candidate.email}
                     </Link>
                   </td>
-                  <td className="px-5 py-3">{Math.round(report.matchingScore)}/100</td>
-                  <td className="px-5 py-3"><Badge value={report.riskLevel} /></td>
+                  <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}/100</td>
+                  <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>
                 </tr>
               ))}
             </tbody>

@@ -24,17 +24,17 @@ export default async function CandidatesPage({ params }: { params: { jobUid: str
         <Link href={`/company/jobs/${job.uid}/comparison`} className="btn-secondary">Comparer</Link>
       </div>
       <section className="panel overflow-hidden">
-        <table className="w-full text-left text-sm">
+        <table className="responsive-table">
           <thead className="bg-mist text-gray-500">
             <tr><th className="px-5 py-3">Candidat</th><th className="px-5 py-3">Statut</th><th className="px-5 py-3">Score</th><th className="px-5 py-3">Rapport</th></tr>
           </thead>
           <tbody>
             {job.invitations.map((invitation) => (
               <tr key={invitation.id} className="border-t border-line">
-                <td className="px-5 py-3">{invitation.candidate ? `${invitation.candidate.firstName} ${invitation.candidate.lastName}` : invitation.candidateEmail}</td>
-                <td className="px-5 py-3"><Badge value={invitation.status} /></td>
-                <td className="px-5 py-3">{invitation.response?.report?.matchingScore != null ? `${Math.round(invitation.response.report.matchingScore)}/100` : "-"}</td>
-                <td className="px-5 py-3">
+                <td className="px-5 py-3" data-label="Candidat">{invitation.candidate ? `${invitation.candidate.firstName} ${invitation.candidate.lastName}` : invitation.candidateEmail}</td>
+                <td className="px-5 py-3" data-label="Statut"><Badge value={invitation.status} /></td>
+                <td className="px-5 py-3" data-label="Score">{invitation.response?.report?.matchingScore != null ? `${Math.round(invitation.response.report.matchingScore)}/100` : "-"}</td>
+                <td className="px-5 py-3" data-label="Rapport">
                   {invitation.response?.report ? (
                     <Link className="font-semibold text-coral" href={`/company/reports/${invitation.response.report.uid}`}>Ouvrir</Link>
                   ) : "-"}

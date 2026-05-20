@@ -29,7 +29,7 @@ export default async function CompanyDashboardPage() {
           <h2 className="font-semibold text-ink">Postes récents</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table">
             <thead className="bg-mist text-gray-500">
               <tr>
                 <th className="px-5 py-3">Poste</th>
@@ -42,15 +42,15 @@ export default async function CompanyDashboardPage() {
             <tbody>
               {data.jobs.map((job) => (
                 <tr key={job.id} className="border-t border-line">
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3" data-label="Poste">
                     <Link href={`/company/jobs/${job.uid}`} className="font-semibold text-ink hover:text-coral">
                       {job.title}
                     </Link>
                   </td>
-                  <td className="px-5 py-3"><Badge value={job.status} /></td>
-                  <td className="px-5 py-3">{job.invitations.length}</td>
-                  <td className="px-5 py-3">{job.reports.length}</td>
-                  <td className="px-5 py-3">{formatDate(job.createdAt)}</td>
+                  <td className="px-5 py-3" data-label="Statut"><Badge value={job.status} /></td>
+                  <td className="px-5 py-3" data-label="Invitations">{job.invitations.length}</td>
+                  <td className="px-5 py-3" data-label="Rapports">{job.reports.length}</td>
+                  <td className="px-5 py-3" data-label="Créé le">{formatDate(job.createdAt)}</td>
                 </tr>
               ))}
             </tbody>

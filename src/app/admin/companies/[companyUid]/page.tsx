@@ -137,15 +137,15 @@ export default async function AdminCompanyDetailPage({ params }: { params: { com
 
       <section className="panel overflow-hidden">
         <div className="border-b border-line px-5 py-4"><h2 className="font-semibold text-ink">Postes</h2></div>
-        <table className="w-full text-left text-sm">
+        <table className="responsive-table">
           <thead className="bg-mist text-gray-500"><tr><th className="px-5 py-3">Poste</th><th className="px-5 py-3">Code</th><th className="px-5 py-3">Statut</th><th className="px-5 py-3">Pipeline</th></tr></thead>
           <tbody>
             {company.jobs.map((job) => (
               <tr key={job.id} className="border-t border-line">
-                <td className="px-5 py-3"><Link href={`/admin/jobs/${job.uid}`} className="font-semibold text-ink hover:text-coral">{job.title}</Link></td>
-                <td className="px-5 py-3"><code className="text-xs">{job.uid}</code></td>
-                <td className="px-5 py-3"><Badge value={job.status} /></td>
-                <td className="px-5 py-3 text-xs text-gray-600">{job.evaluations.length} eval · {job.invitations.length} invitations · {job.reports.length} rapports</td>
+                <td className="px-5 py-3" data-label="Poste"><Link href={`/admin/jobs/${job.uid}`} className="font-semibold text-ink hover:text-coral">{job.title}</Link></td>
+                <td className="px-5 py-3" data-label="Code"><code className="text-xs">{job.uid}</code></td>
+                <td className="px-5 py-3" data-label="Statut"><Badge value={job.status} /></td>
+                <td className="px-5 py-3 text-xs text-gray-600" data-label="Pipeline">{job.evaluations.length} eval · {job.invitations.length} invitations · {job.reports.length} rapports</td>
               </tr>
             ))}
           </tbody>
@@ -155,14 +155,14 @@ export default async function AdminCompanyDetailPage({ params }: { params: { com
       <section className="panel overflow-hidden">
         <div className="border-b border-line px-5 py-4"><h2 className="font-semibold text-ink">Invitations candidates</h2></div>
         {company.invitations.length === 0 ? <div className="p-5 text-sm text-gray-500">Aucune invitation.</div> : (
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table">
             <tbody>
               {company.invitations.slice(0, 20).map((invitation) => (
                 <tr key={invitation.id} className="border-t border-line">
-                  <td className="px-5 py-3">{invitation.candidateEmail}</td>
-                  <td className="px-5 py-3"><Link href={`/admin/jobs/${invitation.job.uid}`} className="hover:text-coral">{invitation.job.title}</Link></td>
-                  <td className="px-5 py-3"><Badge value={invitation.status} /></td>
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3" data-label="Email">{invitation.candidateEmail}</td>
+                  <td className="px-5 py-3" data-label="Poste"><Link href={`/admin/jobs/${invitation.job.uid}`} className="hover:text-coral">{invitation.job.title}</Link></td>
+                  <td className="px-5 py-3" data-label="Statut"><Badge value={invitation.status} /></td>
+                  <td className="px-5 py-3" data-label="Admin">
                     <form action={updateAdminInvitation.bind(null, invitation.uid)} className="flex flex-wrap gap-2">
                       <input type="hidden" name="candidateEmail" value={invitation.candidateEmail} />
                       <select className="field w-auto" name="status" defaultValue={invitation.status}>

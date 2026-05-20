@@ -70,16 +70,16 @@ export default async function AdminCandidateDetailPage({ params }: { params: { c
 
       <section className="panel overflow-hidden">
         <div className="border-b border-line px-5 py-4"><h2 className="font-semibold text-ink">Évaluations du candidat</h2></div>
-        <table className="w-full text-left text-sm">
+        <table className="responsive-table">
           <thead className="bg-mist text-gray-500"><tr><th className="px-5 py-3">Entreprise</th><th className="px-5 py-3">Poste</th><th className="px-5 py-3">Statut</th><th className="px-5 py-3">Réponse</th><th className="px-5 py-3">Rapport</th></tr></thead>
           <tbody>
             {candidate.invitations.map((invitation) => (
               <tr key={invitation.id} className="border-t border-line">
-                <td className="px-5 py-3"><Link href={`/admin/companies/${invitation.company.uid}`} className="hover:text-coral">{invitation.company.name ?? invitation.company.uid}</Link></td>
-                <td className="px-5 py-3"><Link href={`/admin/jobs/${invitation.job.uid}`} className="font-semibold text-ink hover:text-coral">{invitation.job.title}</Link></td>
-                <td className="px-5 py-3"><Badge value={invitation.status} /></td>
-                <td className="px-5 py-3">{invitation.response ? <Link href={`/admin/responses/${invitation.response.uid}`} className="text-coral">Réponse</Link> : "-"}</td>
-                <td className="px-5 py-3">{invitation.response?.report ? <Link href={`/admin/reports/${invitation.response.report.uid}`} className="text-coral">Rapport</Link> : "-"}</td>
+                <td className="px-5 py-3" data-label="Entreprise"><Link href={`/admin/companies/${invitation.company.uid}`} className="hover:text-coral">{invitation.company.name ?? invitation.company.uid}</Link></td>
+                <td className="px-5 py-3" data-label="Poste"><Link href={`/admin/jobs/${invitation.job.uid}`} className="font-semibold text-ink hover:text-coral">{invitation.job.title}</Link></td>
+                <td className="px-5 py-3" data-label="Statut"><Badge value={invitation.status} /></td>
+                <td className="px-5 py-3" data-label="Réponse">{invitation.response ? <Link href={`/admin/responses/${invitation.response.uid}`} className="text-coral">Réponse</Link> : "-"}</td>
+                <td className="px-5 py-3" data-label="Rapport">{invitation.response?.report ? <Link href={`/admin/reports/${invitation.response.report.uid}`} className="text-coral">Rapport</Link> : "-"}</td>
               </tr>
             ))}
           </tbody>

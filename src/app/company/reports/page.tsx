@@ -49,7 +49,7 @@ export default async function CompanyReportsPage() {
           <h2 className="font-semibold text-ink">Bibliothèque des rapports</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table">
             <thead className="bg-mist text-gray-500">
               <tr>
                 <th className="px-5 py-3">Candidat</th>
@@ -63,15 +63,15 @@ export default async function CompanyReportsPage() {
             <tbody>
               {reports.map((report) => (
                 <tr key={report.id} className="border-t border-line">
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3" data-label="Candidat">
                     <p className="font-semibold text-ink">{[report.candidate.firstName, report.candidate.lastName].filter(Boolean).join(" ") || report.candidate.email}</p>
                     <p className="text-xs text-gray-500">{report.candidate.email}</p>
                   </td>
-                  <td className="px-5 py-3">{report.job.title}</td>
-                  <td className="px-5 py-3">{Math.round(report.matchingScore)}/100</td>
-                  <td className="px-5 py-3"><Badge value={report.riskLevel} /></td>
-                  <td className="px-5 py-3">{formatDate(report.createdAt)}</td>
-                  <td className="px-5 py-3">
+                  <td className="px-5 py-3" data-label="Poste">{report.job.title}</td>
+                  <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}/100</td>
+                  <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>
+                  <td className="px-5 py-3" data-label="Date">{formatDate(report.createdAt)}</td>
+                  <td className="px-5 py-3" data-label="Rapport">
                     <Link className="font-semibold text-coral" href={`/company/reports/${report.uid}`}>Ouvrir</Link>
                   </td>
                 </tr>
