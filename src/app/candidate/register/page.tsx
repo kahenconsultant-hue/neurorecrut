@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { registerCandidateUser } from "@/actions/auth-actions";
+import { CandidateLegalConsents } from "@/components/legal/legal-consents";
 import { PublicNav } from "@/components/layout/public-nav";
 
 const errorMessages: Record<string, string> = {
   exists: "Un compte existe déjà avec cet email.",
   database: "Base de données indisponible. Réessayez dans quelques instants.",
   validation: "Tous les champs obligatoires doivent être complétés.",
-  password_mismatch: "Les deux mots de passe doivent être identiques."
+  password_mismatch: "Les deux mots de passe doivent être identiques.",
+  legal: "Vous devez accepter les documents légaux obligatoires pour créer le compte."
 };
 
 export default function CandidateRegisterPage({ searchParams }: { searchParams?: { error?: string } }) {
@@ -44,6 +46,7 @@ export default function CandidateRegisterPage({ searchParams }: { searchParams?:
             <label className="label" htmlFor="confirmPassword">Confirmer le mot de passe</label>
             <input className="field" id="confirmPassword" name="confirmPassword" type="password" minLength={8} autoComplete="new-password" required />
           </div>
+          <CandidateLegalConsents />
           <button className="btn-primary w-full" type="submit">Créer mon espace candidat</button>
           <p className="text-sm text-gray-600">
             Déjà un compte ? <Link className="font-semibold text-coral" href="/login">Connexion</Link>

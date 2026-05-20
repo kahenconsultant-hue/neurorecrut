@@ -591,6 +591,9 @@ export async function validateInvitation(invitationUid: string, options?: { allo
 
 export async function saveCandidateProfile(invitationUid: string, _: unknown, formData: FormData) {
   const invitation = await validateInvitation(invitationUid);
+  if (formString(formData, "acceptCandidateLegal") !== "yes" && formString(formData, "acceptCandidateLegal") !== "on") {
+    redirect(`/candidate/profile/${invitationUid}?error=legal`);
+  }
   const parsed = candidateResumeSchema.parse(Object.fromEntries(formData.entries()));
   if (lower(parsed.email) !== lower(invitation.candidateEmail)) {
     throw new Error("L'email doit correspondre à l'invitation.");

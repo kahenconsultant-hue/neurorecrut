@@ -1,5 +1,6 @@
 import { registerCompanyUser } from "@/actions/auth-actions";
 import { ChoiceGroup } from "@/components/forms/choice-group";
+import { CompanyLegalConsents } from "@/components/legal/legal-consents";
 import { PublicNav } from "@/components/layout/public-nav";
 import { COMPANY_PROFILE_CHOICE_GROUPS, COMPANY_SECTOR_OPTIONS, COMPANY_SIZE_OPTIONS } from "@/lib/form-options";
 
@@ -7,7 +8,8 @@ const errorMessages: Record<string, string> = {
   exists: "Un compte existe déjà avec cet email.",
   database: "Base de données indisponible. Vérifiez DATABASE_URL puis lancez les migrations Prisma.",
   validation: "Tous les champs obligatoires du compte et du profil entreprise doivent être complétés.",
-  password_mismatch: "Les deux mots de passe doivent être identiques."
+  password_mismatch: "Les deux mots de passe doivent être identiques.",
+  legal: "Vous devez accepter les documents légaux obligatoires pour créer le compte."
 };
 
 export default function RegisterPage({ searchParams }: { searchParams?: { error?: string } }) {
@@ -143,6 +145,8 @@ export default function RegisterPage({ searchParams }: { searchParams?: { error?
               ))}
             </div>
           </section>
+
+          <CompanyLegalConsents />
 
           <button className="btn-primary w-full" type="submit">
             Créer le compte et le profil entreprise

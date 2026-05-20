@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { saveCandidateProfile, validateInvitation } from "@/actions/workflow";
+import { CandidateLegalConsents } from "@/components/legal/legal-consents";
 
 const roleOptions = [
   "Commercial B2B",
@@ -87,10 +88,11 @@ function SelectField({
   );
 }
 
-export default async function CandidateProfilePage({ params }: { params: { invitationUid: string } }) {
+export default async function CandidateProfilePage({ params, searchParams }: { params: { invitationUid: string }; searchParams?: { error?: string } }) {
   const invitation = await validateInvitation(params.invitationUid);
   const candidate = invitation.candidate;
   const resume = (candidate?.resumeJson ?? {}) as Record<string, string | null | undefined>;
+  const error = searchParams?.error === "legal" ? "Vous devez accepter les documents légaux obligatoires pour accéder à l’évaluation." : null;
 
   return (
     <main className="min-h-screen bg-mist px-4 py-8">
@@ -104,6 +106,8 @@ export default async function CandidateProfilePage({ params }: { params: { invit
         </div>
 
         <div className="space-y-5 p-6">
+          {error ? <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
+
           <section>
             <h2 className="font-semibold text-ink">Identité</h2>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -156,6 +160,8 @@ export default async function CandidateProfilePage({ params }: { params: { invit
           <input type="hidden" name="achievements" value="" />
           <input type="hidden" name="portfolioUrl" value="" />
           <input type="hidden" name="references" value="" />
+
+          <CandidateLegalConsents />
 
           <button className="btn-primary w-full md:w-auto" type="submit">Accéder à l’évaluation</button>
         </div>

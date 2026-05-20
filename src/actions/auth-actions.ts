@@ -20,6 +20,10 @@ function hasPasswordMismatch(result: ReturnType<typeof registerSchema.safeParse>
   return !result.success && result.error.issues.some((issue) => issue.path.includes("confirmPassword"));
 }
 
+function accepted(formData: FormData, key: string) {
+  return formData.get(key) === "yes" || formData.get(key) === "on";
+}
+
 export async function registerCompanyUser(_: unknown, formData: FormData) {
   const accountResult = registerSchema.safeParse({
     name: formData.get("name"),
@@ -48,6 +52,10 @@ export async function registerCompanyUser(_: unknown, formData: FormData) {
       redirect("/register?error=password_mismatch");
     }
     redirect("/register?error=validation");
+  }
+
+  if (!accepted(formData, "acceptCompanyLegal")) {
+    redirect("/register?error=legal");
   }
 
   const parsed = accountResult.data;
@@ -106,6 +114,10 @@ export async function registerCandidateUser(_: unknown, formData: FormData) {
       redirect("/candidate/register?error=password_mismatch");
     }
     redirect("/candidate/register?error=validation");
+  }
+
+  if (!accepted(formData, "acceptCandidateLegal")) {
+    redirect("/candidate/register?error=legal");
   }
   const parsed = result.data;
 
