@@ -24,7 +24,10 @@ export default async function JobsPage() {
         {jobs.map((job) => (
           <Link href={`/company/jobs/${job.uid}`} key={job.id} className="panel block p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
             <div className="flex items-start justify-between gap-3">
-              <h2 className="text-lg font-semibold text-ink">{job.title}</h2>
+              <div>
+                <p className="font-mono text-xs text-gray-500">{job.code ?? job.uid}</p>
+                <h2 className="text-lg font-semibold text-ink">{job.title}</h2>
+              </div>
               <Badge value={job.status} />
             </div>
             <p className="mt-3 line-clamp-2 text-sm text-gray-600">{job.description}</p>

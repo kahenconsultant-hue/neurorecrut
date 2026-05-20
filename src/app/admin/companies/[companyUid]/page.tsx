@@ -38,7 +38,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: { com
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-xs text-gray-500">{company.uid}</p>
+          <p className="font-mono text-xs text-gray-500">{company.code ?? company.uid}</p>
           <h1 className="text-3xl font-bold text-ink">{company.name ?? "Entreprise sans nom"}</h1>
           <p className="mt-2 text-sm text-gray-600">{company.hrContactEmail ?? company.ownerEmail ?? "Email non renseigné"}</p>
         </div>
@@ -61,6 +61,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: { com
       <AdminMetaGrid
         items={[
           ["Statut", <Badge key="status" value={company.status} />],
+          ["Code", company.code ?? company.uid],
           ["Créée", formatDate(company.createdAt)],
           ["Mise à jour", formatDate(company.updatedAt)],
           ["Utilisateurs", company.users.length]
@@ -143,7 +144,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: { com
             {company.jobs.map((job) => (
               <tr key={job.id} className="border-t border-line">
                 <td className="px-5 py-3" data-label="Poste"><Link href={`/admin/jobs/${job.uid}`} className="font-semibold text-ink hover:text-coral">{job.title}</Link></td>
-                <td className="px-5 py-3" data-label="Code"><code className="text-xs">{job.uid}</code></td>
+                <td className="px-5 py-3" data-label="Code"><code className="text-xs">{job.code ?? job.uid}</code></td>
                 <td className="px-5 py-3" data-label="Statut"><Badge value={job.status} /></td>
                 <td className="px-5 py-3 text-xs text-gray-600" data-label="Pipeline">{job.evaluations.length} eval · {job.invitations.length} invitations · {job.reports.length} rapports</td>
               </tr>

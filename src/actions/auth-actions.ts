@@ -5,6 +5,7 @@ import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { sendCandidateWelcomeEmail, sendCompanyWelcomeEmail } from "@/lib/email";
+import { nextPublicCode } from "@/lib/public-codes";
 import { candidateRegisterSchema, companyProfileSchema, registerSchema } from "@/lib/validators";
 
 function formText(formData: FormData, key: string) {
@@ -98,8 +99,10 @@ export async function registerCompanyUser(_: unknown, formData: FormData) {
     const passwordHash = await bcrypt.hash(parsed.password, 12);
 
     const company = await prisma.$transaction(async (tx) => {
+      const code = await nextPublicCode(tx, "company");
       const createdCompany = await tx.company.create({
         data: {
+          code,
           ...profile,
           website: profile.website || null,
           ownerEmail: email,
@@ -170,22 +173,28 @@ export async function registerCandidateUser(_: unknown, formData: FormData) {
 
   try {
     const passwordHash = await bcrypt.hash(parsed.password, 12);
-    const candidate = await prisma.candidate.create({
-      data: {
-        firstName: parsed.firstName,
-        lastName: parsed.lastName,
-        email
-      }
-    });
+    const candidate = await prisma.$transaction(async (tx) => {
+      const code = await nextPublicCode(tx, "candidate");
+      const createdCandidate = await tx.candidate.create({
+        data: {
+          code,
+          firstName: parsed.firstName,
+          lastName: parsed.lastName,
+          email
+        }
+      });
 
-    await prisma.user.create({
-      data: {
-        email,
-        name: `${parsed.firstName} ${parsed.lastName}`,
-        passwordHash,
-        role: Role.CANDIDATE,
-        candidateId: candidate.id
-      }
+      await tx.user.create({
+        data: {
+          email,
+          name: `${parsed.firstName} ${parsed.lastName}`,
+          passwordHash,
+          role: Role.CANDIDATE,
+          candidateId: createdCandidate.id
+        }
+      });
+
+      return createdCandidate;
     });
 
     await sendCandidateWelcomeEmail({

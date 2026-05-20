@@ -12,10 +12,15 @@ export default async function AdminResponsesPage({ searchParams }: { searchParam
       matchesQuery(getParam(searchParams, "q"), [
         response.uid,
         response.company.name,
+        response.company.code,
         response.job.title,
+        response.job.code,
         response.candidate.email,
+        response.candidate.code,
         response.evaluation.uid,
-        response.report?.uid
+        response.evaluation.code,
+        response.report?.uid,
+        response.report?.code
       ]) &&
       matchesSelect(getParam(searchParams, "company"), response.company.name ?? response.company.uid) &&
       matchesSelect(getParam(searchParams, "submitted"), response.isSubmitted ? "COMPLETED" : "DRAFT") &&

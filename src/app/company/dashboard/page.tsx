@@ -46,6 +46,7 @@ export default async function CompanyDashboardPage() {
                     <Link href={`/company/jobs/${job.uid}`} className="font-semibold text-ink hover:text-coral">
                       {job.title}
                     </Link>
+                    <p className="font-mono text-xs text-gray-400">{job.code ?? job.uid}</p>
                   </td>
                   <td className="px-5 py-3" data-label="Statut"><Badge value={job.status} /></td>
                   <td className="px-5 py-3" data-label="Invitations">{job.invitations.length}</td>

@@ -26,7 +26,7 @@ export default async function AdminCandidateDetailPage({ params }: { params: { c
   return (
     <div className="space-y-6">
       <div>
-        <p className="font-mono text-xs text-gray-500">{candidate.uid}</p>
+        <p className="font-mono text-xs text-gray-500">{candidate.code ?? candidate.uid}</p>
         <h1 className="text-3xl font-bold text-ink">{fullName}</h1>
         <p className="mt-2 text-sm text-gray-600">{candidate.email}</p>
       </div>
@@ -41,6 +41,7 @@ export default async function AdminCandidateDetailPage({ params }: { params: { c
       <AdminMetaGrid
         items={[
           ["Compte", candidate.user ? "Compte candidat actif" : "Sans compte utilisateur"],
+          ["Code", candidate.code ?? candidate.uid],
           ["Entreprise principale", candidate.company ? <Link key="company" href={`/admin/companies/${candidate.company.uid}`} className="text-coral">{candidate.company.name ?? candidate.company.uid}</Link> : "Multi-entreprises"],
           ["Créé", formatDate(candidate.createdAt)],
           ["MAJ", formatDate(candidate.updatedAt)]

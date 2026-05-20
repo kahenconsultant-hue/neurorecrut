@@ -66,6 +66,7 @@ export default async function CompanyReportsPage() {
                   <td className="px-5 py-3" data-label="Candidat">
                     <p className="font-semibold text-ink">{[report.candidate.firstName, report.candidate.lastName].filter(Boolean).join(" ") || report.candidate.email}</p>
                     <p className="text-xs text-gray-500">{report.candidate.email}</p>
+                    <p className="font-mono text-xs text-gray-400">{report.code ?? report.uid}</p>
                   </td>
                   <td className="px-5 py-3" data-label="Poste">{report.job.title}</td>
                   <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}/100</td>

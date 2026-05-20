@@ -10,8 +10,12 @@ export default async function AdminReportsPage({ searchParams }: { searchParams?
     return (
       matchesQuery(getParam(searchParams, "q"), [
         report.uid,
+        report.code,
         report.company.name,
         report.job.title,
+        report.job.code,
+        report.evaluation.code,
+        report.candidate.code,
         report.candidate.email,
         report.candidate.firstName,
         report.candidate.lastName,
@@ -57,7 +61,10 @@ export default async function AdminReportsPage({ searchParams }: { searchParams?
               <tr key={report.id} className="border-t border-line">
                 <td className="px-5 py-3" data-label="Entreprise"><Link href={`/admin/companies/${report.company.uid}`} className="hover:text-coral">{report.company.name ?? report.company.uid}</Link></td>
                 <td className="px-5 py-3" data-label="Poste"><Link href={`/admin/jobs/${report.job.uid}`} className="hover:text-coral">{report.job.title}</Link></td>
-                <td className="px-5 py-3" data-label="Candidat"><Link href={`/admin/candidates/${report.candidate.uid}`} className="font-semibold text-ink hover:text-coral">{report.candidate.email}</Link></td>
+                <td className="px-5 py-3" data-label="Candidat">
+                  <Link href={`/admin/candidates/${report.candidate.uid}`} className="font-semibold text-ink hover:text-coral">{report.candidate.email}</Link>
+                  <p className="font-mono text-xs text-gray-400">{report.code ?? report.uid}</p>
+                </td>
                 <td className="px-5 py-3" data-label="Global">{Math.round(report.globalScore)}/100</td>
                 <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}/100</td>
                 <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>

@@ -61,6 +61,7 @@ export default async function AdminDashboardPage() {
                         {company.name ?? company.uid}
                       </Link>
                       <p className="text-xs text-gray-500">{company.ownerEmail ?? company.hrContactEmail ?? "-"}</p>
+                      <p className="font-mono text-xs text-gray-400">{company.code ?? company.uid}</p>
                     </td>
                     <td className="py-3" data-label="Postes">{company._count.jobs}</td>
                     <td className="py-3" data-label="Rapports">{company._count.reports}</td>
@@ -117,6 +118,7 @@ export default async function AdminDashboardPage() {
                     <Link href={`/admin/reports/${report.uid}`} className="font-semibold text-ink hover:text-coral">
                       {report.candidate.email}
                     </Link>
+                    <p className="font-mono text-xs text-gray-400">{report.code ?? report.uid}</p>
                   </td>
                   <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}/100</td>
                   <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>

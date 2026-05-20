@@ -10,6 +10,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
     return (
       matchesQuery(getParam(searchParams, "q"), [
         company.name,
+        company.code,
         company.uid,
         company.ownerEmail,
         company.hrContactEmail,
@@ -57,7 +58,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                   <Link href={`/admin/companies/${company.uid}`} className="font-semibold text-ink hover:text-coral">
                     {company.name ?? company.uid}
                   </Link>
-                  <p className="mt-1 font-mono text-xs text-gray-500">{company.uid}</p>
+                  <p className="mt-1 font-mono text-xs text-gray-500">{company.code ?? company.uid}</p>
                 </td>
                 <td className="px-5 py-3" data-label="Email">{company.hrContactEmail ?? company.ownerEmail}</td>
                 <td className="px-5 py-3 text-xs text-gray-600" data-label="Activité">

@@ -26,12 +26,14 @@ export default async function JobDetailPage({ params }: { params: { jobUid: stri
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="mb-2"><Badge value={job.status} /></div>
+          <p className="mb-2 font-mono text-xs text-gray-500">{job.code ?? job.uid}</p>
           <h1 className="text-3xl font-bold text-ink">{job.title}</h1>
           <p className="mt-2 max-w-3xl text-gray-600">{job.description}</p>
         </div>
         <Link href={`/company/jobs/${job.uid}/edit`} className="btn-secondary">Modifier</Link>
       </div>
       <div className="grid gap-4 md:grid-cols-4">
+        <StatCard label="Code évaluation" value={job.code ?? job.uid} />
         <StatCard label="Crédits utilisables" value={credits} />
         <StatCard label="Évaluations" value={job.evaluations.length} />
         <StatCard label="Invitations" value={job.invitations.length} />

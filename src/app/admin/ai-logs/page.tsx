@@ -16,8 +16,10 @@ export default async function AdminAiLogsPage({ searchParams }: { searchParams?:
         log.model,
         log.error,
         log.company?.name,
+        log.company?.code,
         log.company?.uid,
         log.job?.title,
+        log.job?.code,
         log.response?.uid
       ]) &&
       matchesSelect(getParam(searchParams, "company"), log.company?.name ?? "-") &&

@@ -191,6 +191,7 @@ export default async function ReportPage({ params }: { params: { reportUid: stri
                 {report.candidate.firstName} {report.candidate.lastName} · {report.job.title}
               </p>
               <p className="mt-1 text-sm text-gray-500">{report.company.name ?? "Entreprise"} · Généré le {formatDate(report.createdAt)}</p>
+              <p className="mt-2 font-mono text-xs text-gray-500">{report.code ?? report.uid}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Link className="btn-primary" href={`/api/reports/${report.uid}/pdf`} target="_blank">
@@ -211,6 +212,7 @@ export default async function ReportPage({ params }: { params: { reportUid: stri
           </h2>
           <dl className="mt-4 space-y-2 text-sm text-gray-700">
             <div className="flex justify-between gap-3"><dt>Email</dt><dd className="text-right font-medium text-ink">{report.candidate.email}</dd></div>
+            <div className="flex justify-between gap-3"><dt>Code</dt><dd className="text-right font-mono text-xs text-ink">{report.candidate.code ?? report.candidate.uid}</dd></div>
             <div className="flex justify-between gap-3"><dt>Poste actuel</dt><dd className="text-right font-medium text-ink">{report.candidate.currentRole ?? "-"}</dd></div>
             <div className="flex justify-between gap-3"><dt>Expérience</dt><dd className="text-right font-medium text-ink">{report.candidate.experienceYears != null ? `${report.candidate.experienceYears} ans` : "-"}</dd></div>
             <div className="flex justify-between gap-3"><dt>Disponibilité</dt><dd className="text-right font-medium text-ink">{report.candidate.availability ?? "-"}</dd></div>
@@ -221,6 +223,7 @@ export default async function ReportPage({ params }: { params: { reportUid: stri
           <h2 className="mt-2 text-lg font-semibold text-ink">{report.job.title}</h2>
           <dl className="mt-4 space-y-2 text-sm text-gray-700">
             <div className="flex justify-between gap-3"><dt>Contrat</dt><dd className="text-right font-medium text-ink">{report.job.contractType}</dd></div>
+            <div className="flex justify-between gap-3"><dt>Code</dt><dd className="text-right font-mono text-xs text-ink">{report.job.code ?? report.job.uid}</dd></div>
             <div className="flex justify-between gap-3"><dt>Localisation</dt><dd className="text-right font-medium text-ink">{report.job.location}</dd></div>
             <div className="flex justify-between gap-3"><dt>Mode</dt><dd className="text-right font-medium text-ink">{report.job.workMode}</dd></div>
             <div className="flex justify-between gap-3"><dt>Niveau</dt><dd className="text-right font-medium text-ink">{report.job.seniorityLevel}</dd></div>

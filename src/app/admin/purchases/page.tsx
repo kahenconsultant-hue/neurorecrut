@@ -13,10 +13,12 @@ export default async function AdminPurchasesPage({ searchParams }: { searchParam
       matchesQuery(getParam(searchParams, "q"), [
         purchase.uid,
         purchase.company.name,
+        purchase.company.code,
         purchase.company.uid,
         purchase.plan.name,
         purchase.plan.code,
         purchase.job?.title,
+        purchase.job?.code,
         purchase.stripeCheckoutSessionId,
         purchase.stripePaymentIntentId,
         purchase.stripeSubscriptionId

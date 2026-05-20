@@ -14,7 +14,7 @@ export default async function AdminEvaluationDetailPage({ params }: { params: { 
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-xs text-gray-500">{evaluation.uid}</p>
+          <p className="font-mono text-xs text-gray-500">{evaluation.code ?? evaluation.uid}</p>
           <h1 className="text-3xl font-bold text-ink">{evaluation.version}</h1>
           <p className="mt-2 text-sm text-gray-600">
             <Link href={`/admin/jobs/${evaluation.job.uid}`} className="font-semibold text-coral">{evaluation.job.title}</Link>
@@ -37,6 +37,7 @@ export default async function AdminEvaluationDetailPage({ params }: { params: { 
       <AdminMetaGrid
         items={[
           ["Statut", <Badge key="status" value={evaluation.status} />],
+          ["Code", evaluation.code ?? evaluation.uid],
           ["Langue", evaluation.language],
           ["Générée par", evaluation.generatedBy?.email ?? "Système"],
           ["Créée", formatDate(evaluation.createdAt)]

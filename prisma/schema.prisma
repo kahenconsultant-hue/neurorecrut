@@ -90,6 +90,7 @@ model User {
 model Company {
   id                  String        @id @default(cuid())
   uid                 String        @unique @default(cuid())
+  code                String?       @unique
   ownerEmail          String?
   name                String?
   siretSiren          String?
@@ -126,6 +127,7 @@ model Company {
 model JobPosition {
   id                          String    @id @default(cuid())
   uid                         String    @unique @default(cuid())
+  code                        String?   @unique
   companyId                   String
   title                       String
   description                 String
@@ -238,6 +240,7 @@ model CreditBalance {
 model Evaluation {
   id              String           @id @default(cuid())
   uid             String           @unique @default(cuid())
+  code            String?          @unique
   companyId       String
   jobId           String
   language        String           @default("fr")
@@ -262,6 +265,7 @@ model Evaluation {
 model Candidate {
   id                 String   @id @default(cuid())
   uid                String   @unique @default(cuid())
+  code               String?  @unique
   companyId          String?
   firstName          String?
   lastName           String?
@@ -355,6 +359,7 @@ model CandidateResponse {
 model AnalysisReport {
   id              String    @id @default(cuid())
   uid             String    @unique @default(cuid())
+  code            String?   @unique
   companyId       String
   jobId           String
   evaluationId    String
@@ -429,4 +434,10 @@ model AuditLog {
   @@index([userId])
   @@index([companyId])
   @@index([entityType])
+}
+
+model PublicIdCounter {
+  key       String   @id
+  value     Int      @default(0)
+  updatedAt DateTime @updatedAt
 }

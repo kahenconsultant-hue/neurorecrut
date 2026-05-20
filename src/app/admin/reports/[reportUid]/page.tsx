@@ -12,7 +12,7 @@ export default async function AdminReportDetailPage({ params }: { params: { repo
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-xs text-gray-500">{report.uid}</p>
+          <p className="font-mono text-xs text-gray-500">{report.code ?? report.uid}</p>
           <h1 className="text-3xl font-bold text-ink">Rapport RH</h1>
           <p className="mt-2 text-sm text-gray-600">
             <Link href={`/admin/candidates/${report.candidate.uid}`} className="font-semibold text-coral">{report.candidate.email}</Link>
@@ -36,6 +36,9 @@ export default async function AdminReportDetailPage({ params }: { params: { repo
       <AdminMetaGrid
         items={[
           ["Entreprise", <Link key="company" href={`/admin/companies/${report.company.uid}`} className="text-coral">{report.company.name ?? report.company.uid}</Link>],
+          ["Code rapport", report.code ?? report.uid],
+          ["Code candidat", report.candidate.code ?? report.candidate.uid],
+          ["Code poste", report.job.code ?? report.job.uid],
           ["Évaluation", <Link key="evaluation" href={`/admin/evaluations/${report.evaluation.uid}`} className="text-coral">{report.evaluation.version}</Link>],
           ["Réponse", <Link key="response" href={`/admin/responses/${report.response.uid}`} className="text-coral">{report.response.uid}</Link>],
           ["Risque", <Badge key="risk" value={report.riskLevel} />],

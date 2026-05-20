@@ -14,7 +14,8 @@
     "prisma:seed": "prisma db seed",
     "prisma:seed:demo": "tsx prisma/seed.ts",
     "prisma:seed:production": "tsx prisma/seed.production.ts",
-    "prisma:seed:production:dry": "tsx prisma/seed.production.ts --dry-run"
+    "prisma:seed:production:dry": "tsx prisma/seed.production.ts --dry-run",
+    "public-codes:backfill": "tsx scripts/backfill-public-codes.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",

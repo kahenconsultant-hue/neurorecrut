@@ -11,6 +11,7 @@ export default async function AdminCandidatesPage({ searchParams }: { searchPara
       matchesQuery(getParam(searchParams, "q"), [
         candidate.firstName,
         candidate.lastName,
+        candidate.code,
         candidate.email,
         candidate.phone,
         candidate.currentRole,
@@ -60,6 +61,7 @@ export default async function AdminCandidatesPage({ searchParams }: { searchPara
                     {candidate.firstName ?? ""} {candidate.lastName ?? ""}
                   </Link>
                   <p className="text-xs text-gray-500">{candidate.email}</p>
+                  <p className="font-mono text-xs text-gray-400">{candidate.code ?? candidate.uid}</p>
                 </td>
                 <td className="px-5 py-3" data-label="Entreprise">
                   {candidate.company ? <Link href={`/admin/companies/${candidate.company.uid}`} className="hover:text-coral">{candidate.company.name ?? candidate.company.uid}</Link> : "Multi-entreprises"}

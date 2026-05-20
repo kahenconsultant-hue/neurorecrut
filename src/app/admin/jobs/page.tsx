@@ -11,6 +11,7 @@ export default async function AdminJobsPage({ searchParams }: { searchParams?: A
     return (
       matchesQuery(getParam(searchParams, "q"), [
         job.title,
+        job.code,
         job.uid,
         job.description,
         job.location,
@@ -69,7 +70,7 @@ export default async function AdminJobsPage({ searchParams }: { searchParams?: A
                     {job.company.name ?? job.company.uid}
                   </Link>
                 </td>
-                <td className="px-5 py-3" data-label="Code candidat"><code className="font-mono text-xs">{job.uid}</code></td>
+                <td className="px-5 py-3" data-label="Code candidat"><code className="font-mono text-xs">{job.code ?? job.uid}</code></td>
                 <td className="px-5 py-3 text-xs text-gray-600" data-label="Pipeline">
                   {job.evaluations.length} eval · {job._count.invitations} invitations · {job._count.reports} rapports
                 </td>

@@ -34,7 +34,7 @@ export default async function AdminJobDetailPage({ params, searchParams }: { par
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-xs text-gray-500">{job.uid}</p>
+          <p className="font-mono text-xs text-gray-500">{job.code ?? job.uid}</p>
           <h1 className="text-3xl font-bold text-ink">{job.title}</h1>
           <p className="mt-2 text-sm text-gray-600">
             <Link href={`/admin/companies/${job.company.uid}`} className="font-semibold text-coral">{job.company.name ?? job.company.uid}</Link>
@@ -61,7 +61,7 @@ export default async function AdminJobDetailPage({ params, searchParams }: { par
 
       <section className="panel p-5">
         <p className="text-sm font-medium text-gray-500">Code unique candidat</p>
-        <code className="mt-3 inline-block rounded-md border border-line bg-mist px-3 py-2 font-mono text-sm text-ink">{job.uid}</code>
+        <code className="mt-3 inline-block rounded-md border border-line bg-mist px-3 py-2 font-mono text-sm text-ink">{job.code ?? job.uid}</code>
       </section>
 
       <form action={updateAdminJob.bind(null, job.uid)} className="panel space-y-5 p-5">

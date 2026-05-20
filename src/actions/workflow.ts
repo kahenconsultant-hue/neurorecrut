@@ -24,6 +24,7 @@ import { callJsonAi } from "@/lib/ai/client";
 import { fallbackEvaluation, fallbackHrReport, fallbackQualitativeAnalysis, fallbackTargetProfile } from "@/lib/ai/fallbacks";
 import { calculateScores } from "@/lib/scoring/scoring-engine";
 import { createReportPdfBuffer, type ReportPdfMetadata } from "@/lib/pdf/report-pdf";
+import { nextPublicCode } from "@/lib/public-codes";
 import {
   sendCandidateInvitationEmail,
   sendCandidateSubmissionEmail,
@@ -240,6 +241,7 @@ export async function updateCompanyProfile(_: unknown, formData: FormData) {
 export async function createJobPosition(_: unknown, formData: FormData) {
   const { session } = await requireCompanyUser();
   if (!session.user.companyId) throw new Error("Entreprise introuvable");
+  const companyId = session.user.companyId;
 
   const result = jobPositionSchema.safeParse(buildJobPayload(formData));
   if (!result.success) {
@@ -247,12 +249,16 @@ export async function createJobPosition(_: unknown, formData: FormData) {
   }
   const parsed = result.data;
 
-  const job = await prisma.jobPosition.create({
-    data: {
-      ...parsed,
-      companyId: session.user.companyId,
-      softSkillMatrix: jsonInput(parsed.softSkillMatrix)
-    }
+  const job = await prisma.$transaction(async (tx) => {
+    const code = await nextPublicCode(tx, "job");
+    return tx.jobPosition.create({
+      data: {
+        code,
+        ...parsed,
+        companyId,
+        softSkillMatrix: jsonInput(parsed.softSkillMatrix)
+      }
+    });
   });
 
   await generateTargetProfile(job.uid);
@@ -484,15 +490,19 @@ export async function generateEvaluation(jobUid: string) {
     version: "NeuroRecrut Ultra MVP v1"
   };
 
-  await prisma.evaluation.create({
-    data: {
-      uid: normalized.evaluation_uid,
-      companyId: freshJob.companyId,
-      jobId: freshJob.id,
-      json: jsonInput(normalized),
-      generatedByUserId: (await requireAuth()).user.id,
-      status: "GENERATED"
-    }
+  await prisma.$transaction(async (tx) => {
+    const code = await nextPublicCode(tx, "evaluation");
+    await tx.evaluation.create({
+      data: {
+        code,
+        uid: normalized.evaluation_uid,
+        companyId: freshJob.companyId,
+        jobId: freshJob.id,
+        json: jsonInput(normalized),
+        generatedByUserId: (await requireAuth()).user.id,
+        status: "GENERATED"
+      }
+    });
   });
 
   await prisma.jobPosition.update({
@@ -599,10 +609,21 @@ export async function saveCandidateProfile(invitationUid: string, _: unknown, fo
     throw new Error("L'email doit correspondre à l'invitation.");
   }
 
-  const candidate = await prisma.candidate.upsert({
-    where: { uid: invitation.candidate?.uid ?? `missing_${randomUUID()}` },
-    create: buildCandidateProfileData(parsed, invitation.companyId),
-    update: buildCandidateProfileData(parsed, invitation.companyId)
+  const candidate = await prisma.$transaction(async (tx) => {
+    if (invitation.candidate?.uid) {
+      return tx.candidate.update({
+        where: { uid: invitation.candidate.uid },
+        data: buildCandidateProfileData(parsed, invitation.companyId)
+      });
+    }
+
+    const code = await nextPublicCode(tx, "candidate");
+    return tx.candidate.create({
+      data: {
+        code,
+        ...buildCandidateProfileData(parsed, invitation.companyId)
+      }
+    });
   });
 
   await prisma.evaluationInvitation.update({
@@ -626,7 +647,7 @@ export async function startEvaluationByAccessCode(_: unknown, formData: FormData
 
   const evaluation = await prisma.evaluation.findFirst({
     where: {
-      OR: [{ uid: accessCode }, { job: { uid: accessCode } }]
+      OR: [{ uid: accessCode }, { code: accessCode }, { job: { uid: accessCode } }, { job: { code: accessCode } }]
     },
     include: {
       job: { include: { company: true } },
@@ -883,26 +904,30 @@ export async function analyzeCandidateResponse(responseUid: string) {
   };
   const pdfBuffer = await generateReportPdf(reportJson, analysisJson, reportMetadata);
 
-  const report = await prisma.analysisReport.create({
-    data: {
-      uid: `report_${randomUUID()}`,
-      companyId: response.companyId,
-      jobId: response.jobId,
-      evaluationId: response.evaluationId,
-      candidateId: response.candidateId,
-      responseId: response.id,
-      analysisJson: jsonInput(analysisJson),
-      reportJson: jsonInput(reportJson),
-      pdfBuffer: bytesInput(pdfBuffer),
-      pdfFileName: `rapport-neurorecrut-${response.candidate.lastName ?? "candidat"}.pdf`,
-      globalScore: scores.global_score,
-      matchingScore: scores.job_matching_score,
-      coherenceIndex: scores.coherence_index,
-      sincerityIndex: scores.sincerity_index,
-      riskLevel: scores.risk_level as RiskLevel,
-      recommendation: scores.recommendation,
-      finalOpinion: scores.final_opinion
-    }
+  const report = await prisma.$transaction(async (tx) => {
+    const code = await nextPublicCode(tx, "report");
+    return tx.analysisReport.create({
+      data: {
+        code,
+        uid: `report_${randomUUID()}`,
+        companyId: response.companyId,
+        jobId: response.jobId,
+        evaluationId: response.evaluationId,
+        candidateId: response.candidateId,
+        responseId: response.id,
+        analysisJson: jsonInput(analysisJson),
+        reportJson: jsonInput(reportJson),
+        pdfBuffer: bytesInput(pdfBuffer),
+        pdfFileName: `rapport-neurorecrut-${response.candidate.lastName ?? "candidat"}.pdf`,
+        globalScore: scores.global_score,
+        matchingScore: scores.job_matching_score,
+        coherenceIndex: scores.coherence_index,
+        sincerityIndex: scores.sincerity_index,
+        riskLevel: scores.risk_level as RiskLevel,
+        recommendation: scores.recommendation,
+        finalOpinion: scores.final_opinion
+      }
+    });
   });
 
   await sendReportReadyEmail({
@@ -1013,7 +1038,7 @@ export async function getAdminDashboardData() {
       orderBy: { createdAt: "desc" }
     }),
     prisma.analysisReport.findMany({
-      include: { company: true, job: true, candidate: true, response: true },
+      include: { company: true, job: true, evaluation: true, candidate: true, response: true },
       orderBy: { createdAt: "desc" }
     }),
     prisma.aiLog.findMany({ include: { company: true, job: true, response: true }, orderBy: { createdAt: "desc" }, take: 150 }),
