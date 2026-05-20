@@ -78,6 +78,10 @@ function fromAddress() {
   return process.env.EMAIL_FROM || "NeuroRecrut <no-reply@neurorecrut.com>";
 }
 
+function replyToAddress() {
+  return process.env.EMAIL_REPLY_TO || process.env.EMAIL_FROM || undefined;
+}
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -96,6 +100,7 @@ function emailShell(title: string, body: string, cta?: { label: string; href: st
   const ctaHtml = cta
     ? `<p style="margin:28px 0 0"><a href="${escapeHtml(cta.href)}" style="display:inline-block;background:#293241;color:#ffffff;text-decoration:none;border-radius:8px;padding:12px 18px;font-weight:700">${escapeHtml(cta.label)}</a></p>`
     : "";
+  const footer = "Vous recevez cet email transactionnel car une action a ete effectuee sur la plateforme NeuroRecrut.";
 
   return `<!doctype html>
 <html lang="fr">
@@ -114,6 +119,12 @@ function emailShell(title: string, body: string, cta?: { label: string; href: st
                 <h1 style="margin:0 0 16px;font-size:26px;line-height:1.2;color:#111827">${safeTitle}</h1>
                 <div style="font-size:15px;line-height:1.7;color:#4b5563">${body}</div>
                 ${ctaHtml}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 32px;background:#f9fafb;border-top:1px solid #e5e7eb;font-size:12px;line-height:1.6;color:#6b7280">
+                ${escapeHtml(footer)}<br />
+                NeuroRecrut - Plateforme IA d'evaluation RH contextualisee.
               </td>
             </tr>
           </table>
@@ -137,10 +148,16 @@ export async function sendEmail({ to, subject, text, html }: SendEmailInput) {
   try {
     await smtp.sendMail({
       from: fromAddress(),
+      replyTo: replyToAddress(),
       to: recipients.join(", "),
       subject,
       text,
-      html
+      html,
+      headers: {
+        "Auto-Submitted": "auto-generated",
+        "X-Auto-Response-Suppress": "OOF, AutoReply",
+        "X-Mailer": "NeuroRecrut Transactional"
+      }
     });
     return { sent: true };
   } catch (error) {
