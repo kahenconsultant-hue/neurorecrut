@@ -15,6 +15,8 @@ type ScoringResult = {
   final_opinion: "Recommandé" | "Recommandé avec accompagnement" | "Réserve" | "Non recommandé";
 };
 
+export type RiskLevelValue = ScoringResult["risk_level"];
+
 function getMaxScore(question: EvaluationQuestion) {
   if (question.type === "ROLE_PLAY") return 5;
   if (question.type === "OPEN") return 3;
@@ -47,14 +49,52 @@ function getChoiceIndicators(question: EvaluationQuestion, answer?: CandidateAns
   return selected?.hidden_indicators ?? [];
 }
 
-function recommendation(score: number) {
+function getNormalizedAnswerSignal(question: EvaluationQuestion, answer?: CandidateAnswer) {
+  if (!answer) return null;
+  const max = getMaxScore(question);
+  if (max <= 0) return null;
+  return clamp((scoreAnswer(question, answer) / max) * 100, 0, 100);
+}
+
+function isMirrorCoherent(
+  question: EvaluationQuestion,
+  answer: CandidateAnswer | undefined,
+  mirrorQuestion: EvaluationQuestion,
+  mirrorAnswer: CandidateAnswer | undefined
+) {
+  const currentIndicators = getChoiceIndicators(question, answer);
+  const mirrorIndicators = getChoiceIndicators(mirrorQuestion, mirrorAnswer);
+  const hasIndicatorOverlap = currentIndicators.some((indicator) => mirrorIndicators.includes(indicator));
+  if (hasIndicatorOverlap) return true;
+
+  const currentSignal = getNormalizedAnswerSignal(question, answer);
+  const mirrorSignal = getNormalizedAnswerSignal(mirrorQuestion, mirrorAnswer);
+  if (currentSignal == null || mirrorSignal == null) return false;
+
+  const delta = Math.abs(currentSignal - mirrorSignal);
+  return delta <= 35 || (currentSignal >= 65 && mirrorSignal >= 65) || (currentSignal <= 35 && mirrorSignal <= 35);
+}
+
+export function recommendation(score: number) {
   if (score >= 85) return "Excellent matching";
   if (score >= 70) return "Matching solide";
   if (score >= 55) return "Matching partiel ou risqué";
   return "Incompatible ou risque élevé";
 }
 
-function finalOpinion(score: number, risk: "LOW" | "MEDIUM" | "HIGH"): ScoringResult["final_opinion"] {
+export function deriveRiskLevel(jobMatchingScore: number, coherenceIndex: number, sincerityIndex: number): RiskLevelValue {
+  const matching = clamp(jobMatchingScore, 0, 100);
+  const coherence = clamp(coherenceIndex, 0, 100);
+  const sincerity = clamp(sincerityIndex, -10, 10);
+  const normalizedSincerity = ((sincerity + 10) / 20) * 100;
+  const compositeRisk = (100 - matching) * 0.5 + (100 - coherence) * 0.3 + (100 - normalizedSincerity) * 0.2;
+
+  if (matching < 50 || coherence < 35 || sincerity <= -9) return "HIGH";
+  if (compositeRisk >= 42 || matching < 70 || coherence < 70 || sincerity < -4) return "MEDIUM";
+  return "LOW";
+}
+
+export function finalOpinion(score: number, risk: "LOW" | "MEDIUM" | "HIGH"): ScoringResult["final_opinion"] {
   if (score >= 82 && risk === "LOW") return "Recommandé";
   if (score >= 68 && risk !== "HIGH") return "Recommandé avec accompagnement";
   if (score >= 55) return "Réserve";
@@ -95,10 +135,7 @@ export function calculateScores(evaluation: EvaluationJson, answers: CandidateAn
           .find((item) => item.question_uid === question.mirror_question_reference);
         if (mirrorQuestion) {
           coherencePairs += 1;
-          const currentIndicators = getChoiceIndicators(question, answer);
-          const mirrorIndicators = getChoiceIndicators(mirrorQuestion, answerByQuestion.get(mirrorQuestion.question_uid));
-          const hasOverlap = currentIndicators.some((indicator) => mirrorIndicators.includes(indicator));
-          if (hasOverlap) {
+          if (isMirrorCoherent(question, answer, mirrorQuestion, answerByQuestion.get(mirrorQuestion.question_uid))) {
             coherentPairs += 1;
             sincerity += 2;
           } else {
@@ -127,12 +164,7 @@ export function calculateScores(evaluation: EvaluationJson, answers: CandidateAn
   const coherenceIndex = coherencePairs ? Math.round((coherentPairs / coherencePairs) * 100) : 100;
   const sincerityIndex = clamp(sincerity, -10, 10);
   const jobMatchingScore = Math.round(globalScore * 0.72 + hardSkillScore * 0.18 + coherenceIndex * 0.1);
-  const riskLevel =
-    coherenceIndex < 55 || sincerityIndex <= -6 || jobMatchingScore < 55
-      ? "HIGH"
-      : coherenceIndex < 75 || sincerityIndex < 0 || jobMatchingScore < 70
-        ? "MEDIUM"
-        : "LOW";
+  const riskLevel = deriveRiskLevel(jobMatchingScore, coherenceIndex, sincerityIndex);
 
   return {
     global_score: globalScore,
