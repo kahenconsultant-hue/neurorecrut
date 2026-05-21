@@ -5,7 +5,8 @@ export const PUBLIC_CODE_CONFIG = {
   candidate: { prefix: "c", label: "Candidat" },
   job: { prefix: "j", label: "Poste" },
   evaluation: { prefix: "e", label: "Évaluation" },
-  report: { prefix: "r", label: "Rapport" }
+  report: { prefix: "r", label: "Rapport" },
+  ticket: { prefix: "t", label: "Ticket" }
 } as const;
 
 export type PublicCodeKey = keyof typeof PUBLIC_CODE_CONFIG;

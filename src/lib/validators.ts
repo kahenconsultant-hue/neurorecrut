@@ -116,3 +116,78 @@ export const draftAnswerSchema = z.object({
     })
   )
 });
+
+const optionalText = z.string().trim().optional().or(z.literal(""));
+
+export const contactRequestSchema = z
+  .object({
+    category: z.enum(["COMPANY", "CANDIDATE", "PARTNERSHIP", "PRESS", "DATA_PRIVACY", "TECHNICAL", "OTHER"]),
+    firstName: z.string().trim().min(1, "Prénom requis"),
+    lastName: z.string().trim().min(1, "Nom requis"),
+    email: z.string().trim().email("Email invalide"),
+    phone: optionalText,
+    organization: optionalText,
+    role: optionalText,
+    subject: z.string().trim().min(4, "Objet requis"),
+    message: z.string().trim().min(20, "Précisez votre demande"),
+    recruitmentNeed: optionalText,
+    companySize: optionalText,
+    candidateTopic: optionalText,
+    evaluationReference: optionalText,
+    partnershipType: optionalText,
+    website: z.string().trim().url("URL invalide").optional().or(z.literal("")),
+    mediaName: optionalText,
+    mediaDeadline: optionalText,
+    privacyRequest: optionalText,
+    accountEmail: z.string().trim().email("Email de compte invalide").optional().or(z.literal("")),
+    technicalArea: optionalText
+  })
+  .superRefine((data, ctx) => {
+    if (data.category === "COMPANY" && !data.organization) {
+      ctx.addIssue({ code: "custom", path: ["organization"], message: "Nom de l'entreprise requis" });
+    }
+    if (data.category === "CANDIDATE" && !data.candidateTopic) {
+      ctx.addIssue({ code: "custom", path: ["candidateTopic"], message: "Sujet candidat requis" });
+    }
+    if (data.category === "PARTNERSHIP" && (!data.organization || !data.partnershipType)) {
+      ctx.addIssue({ code: "custom", path: ["partnershipType"], message: "Organisation et type de partenariat requis" });
+    }
+    if (data.category === "PRESS" && (!data.mediaName || !data.mediaDeadline)) {
+      ctx.addIssue({ code: "custom", path: ["mediaName"], message: "Média et échéance requis" });
+    }
+    if (data.category === "DATA_PRIVACY" && !data.privacyRequest) {
+      ctx.addIssue({ code: "custom", path: ["privacyRequest"], message: "Type de demande requis" });
+    }
+    if (data.category === "TECHNICAL" && (!data.accountEmail || !data.technicalArea)) {
+      ctx.addIssue({ code: "custom", path: ["technicalArea"], message: "Compte et zone impactée requis" });
+    }
+  });
+
+export const supportTicketSchema = z.object({
+  category: z.enum([
+    "EVALUATION",
+    "CANDIDATE_INVITATION",
+    "REPORT",
+    "BILLING",
+    "ACCOUNT_ACCESS",
+    "DATA_PRIVACY",
+    "TECHNICAL",
+    "FEATURE_REQUEST",
+    "OTHER"
+  ]),
+  priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]),
+  subject: z.string().trim().min(5).max(180),
+  message: z.string().trim().min(20).max(6000),
+  jobUid: optionalText,
+  impact: optionalText,
+  relatedUrl: z.string().trim().url("URL invalide").optional().or(z.literal(""))
+});
+
+export const supportReplySchema = z.object({
+  message: z.string().trim().min(2).max(6000)
+});
+
+export const supportTicketAdminSchema = z.object({
+  status: z.enum(["OPEN", "IN_PROGRESS", "WAITING_COMPANY", "RESOLVED", "CLOSED"]),
+  priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"])
+});

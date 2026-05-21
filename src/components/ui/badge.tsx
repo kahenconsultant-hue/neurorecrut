@@ -11,7 +11,13 @@ const colorMap: Record<string, string> = {
   EXPIRED: "bg-red-50 text-red-700",
   PAID: "bg-teal/10 text-teal",
   PENDING: "bg-gold/20 text-graphite",
+  OPEN: "bg-coral/10 text-coral",
+  IN_PROGRESS: "bg-teal/10 text-teal",
+  WAITING_COMPANY: "bg-gold/20 text-graphite",
+  RESOLVED: "bg-graphite/10 text-graphite",
+  CLOSED: "bg-gray-100 text-gray-700",
   LOW: "bg-teal/10 text-teal",
+  NORMAL: "bg-graphite/10 text-graphite",
   MEDIUM: "bg-gold/20 text-graphite",
   HIGH: "bg-red-50 text-red-700"
 };

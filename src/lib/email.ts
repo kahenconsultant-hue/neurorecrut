@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { getAppUrl } from "@/lib/app-url";
 import { formatCompatibilityScore } from "@/lib/format";
+import { contactCategoryLabel, supportCategoryLabel, supportPriorityLabel } from "@/lib/support";
 
 type EmailAddress = string | null | undefined;
 
@@ -10,6 +11,7 @@ type SendEmailInput = {
   subject: string;
   text: string;
   html?: string;
+  replyTo?: string;
 };
 
 type CompanyWelcomeInput = {
@@ -54,6 +56,31 @@ type ReportReadyInput = {
   jobTitle: string;
   reportUid: string;
   matchingScore: number;
+};
+
+type ContactEmailInput = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string | null;
+  organization?: string | null;
+  category: string;
+  subject: string;
+  message: string;
+  details: Array<{ label: string; value?: string | null }>;
+};
+
+type SupportTicketEmailInput = {
+  to: EmailAddress[];
+  ticketUid: string;
+  ticketCode?: string | null;
+  companyName?: string | null;
+  contactName?: string | null;
+  contactEmail: string;
+  subject: string;
+  category: string;
+  priority: string;
+  message: string;
 };
 
 let transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo> | null = null;
@@ -104,6 +131,26 @@ function formatDate(date: Date) {
   return new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(date);
 }
 
+function htmlLines(value: string) {
+  return escapeHtml(value).replace(/\n/g, "<br />");
+}
+
+function detailList(details: Array<{ label: string; value?: string | null }>) {
+  const rows = details
+    .filter((detail) => detail.value?.trim())
+    .map((detail) => `<li><strong>${escapeHtml(detail.label)}:</strong> ${htmlLines(detail.value ?? "")}</li>`)
+    .join("");
+  return rows ? `<ul style="margin:16px 0;padding-left:18px">${rows}</ul>` : "";
+}
+
+function supportTicketLabel(ticketCode: string | null | undefined, ticketUid: string) {
+  return ticketCode?.trim() || ticketUid;
+}
+
+function supportInboxAddress() {
+  return process.env.SUPPORT_INBOX_EMAIL || process.env.CONTACT_EMAIL || "contact@neurorecrut.com";
+}
+
 function emailShell(title: string, body: string, cta?: { label: string; href: string }) {
   const safeTitle = escapeHtml(title);
   const ctaHtml = cta
@@ -144,7 +191,7 @@ function emailShell(title: string, body: string, cta?: { label: string; href: st
 </html>`;
 }
 
-export async function sendEmail({ to, subject, text, html }: SendEmailInput) {
+export async function sendEmail({ to, subject, text, html, replyTo }: SendEmailInput) {
   const recipients = Array.isArray(to) ? uniqueRecipients(to) : uniqueRecipients([to]);
   if (recipients.length === 0) return { skipped: true };
 
@@ -157,7 +204,7 @@ export async function sendEmail({ to, subject, text, html }: SendEmailInput) {
   try {
     await smtp.sendMail({
       from: fromAddress(),
-      replyTo: replyToAddress(),
+      replyTo: replyTo || replyToAddress(),
       to: recipients.join(", "),
       subject,
       text,
@@ -273,5 +320,95 @@ export async function sendReportReadyEmail({ to, candidateName, companyName, job
     subject: `Rapport NeuroRecrut disponible - ${candidateName}`,
     text: `Le rapport NeuroRecrut est disponible pour ${candidateName}. Lien: ${href}`,
     html: emailShell(title, body, { label: "Ouvrir le rapport", href })
+  });
+}
+
+export async function sendContactRequestEmail(input: ContactEmailInput) {
+  const fullName = `${input.firstName} ${input.lastName}`.trim();
+  const title = "Nouvelle demande depuis le formulaire de contact";
+  const body = `<p><strong>${escapeHtml(fullName)}</strong> a envoyé une demande NeuroRecrut.</p>
+<p>Catégorie: <strong>${escapeHtml(contactCategoryLabel(input.category))}</strong><br />
+Email: <strong>${escapeHtml(input.email)}</strong>${input.phone ? `<br />Téléphone: <strong>${escapeHtml(input.phone)}</strong>` : ""}${input.organization ? `<br />Organisation: <strong>${escapeHtml(input.organization)}</strong>` : ""}</p>
+${detailList(input.details)}
+<p style="margin-top:18px"><strong>Message</strong></p>
+<p>${htmlLines(input.message)}</p>`;
+
+  return sendEmail({
+    to: supportInboxAddress(),
+    replyTo: input.email,
+    subject: `[Contact NeuroRecrut] ${contactCategoryLabel(input.category)} - ${input.subject}`,
+    text: `${fullName} (${input.email}) - ${contactCategoryLabel(input.category)}\n\n${input.message}`,
+    html: emailShell(title, body)
+  });
+}
+
+export async function sendContactConfirmationEmail(input: Pick<ContactEmailInput, "firstName" | "email" | "subject" | "category">) {
+  const title = "Votre demande a bien été transmise";
+  const body = `<p>Bonjour ${escapeHtml(input.firstName)},</p>
+<p>Nous avons reçu votre message concernant <strong>${escapeHtml(input.subject)}</strong>.</p>
+<p>Catégorie: <strong>${escapeHtml(contactCategoryLabel(input.category))}</strong>. L'équipe NeuroRecrut reviendra vers vous via cette adresse email.</p>`;
+
+  return sendEmail({
+    to: input.email,
+    subject: "Confirmation de votre demande NeuroRecrut",
+    text: `Votre demande NeuroRecrut "${input.subject}" a bien été transmise.`,
+    html: emailShell(title, body)
+  });
+}
+
+export async function sendSupportTicketInboxEmail(input: SupportTicketEmailInput & { event: "created" | "company_reply" }) {
+  const ticketLabel = supportTicketLabel(input.ticketCode, input.ticketUid);
+  const appUrl = getAppUrl();
+  const title = input.event === "created" ? "Nouveau ticket entreprise" : "Nouvelle réponse entreprise";
+  const body = `<p>${input.event === "created" ? "Un ticket" : "Une réponse"} a été transmis${input.companyName ? ` par <strong>${escapeHtml(input.companyName)}</strong>` : ""}.</p>
+<p>Ticket: <strong>${escapeHtml(ticketLabel)}</strong><br />
+Objet: <strong>${escapeHtml(input.subject)}</strong><br />
+Catégorie: <strong>${escapeHtml(supportCategoryLabel(input.category))}</strong><br />
+Priorité: <strong>${escapeHtml(supportPriorityLabel(input.priority))}</strong><br />
+Contact: <strong>${escapeHtml(input.contactName || input.contactEmail)}</strong> · ${escapeHtml(input.contactEmail)}</p>
+<p style="margin-top:18px"><strong>Message</strong></p>
+<p>${htmlLines(input.message)}</p>`;
+
+  return sendEmail({
+    to: supportInboxAddress(),
+    replyTo: input.contactEmail,
+    subject: `[Ticket ${ticketLabel}] ${input.event === "created" ? "Ouverture" : "Réponse"} - ${input.subject}`,
+    text: `Ticket ${ticketLabel} - ${input.subject}\n${input.message}`,
+    html: emailShell(title, body, { label: "Ouvrir dans l'admin", href: `${appUrl}/admin/tickets/${input.ticketUid}` })
+  });
+}
+
+export async function sendSupportTicketConfirmationEmail(input: SupportTicketEmailInput & { event: "created" | "company_reply" }) {
+  const ticketLabel = supportTicketLabel(input.ticketCode, input.ticketUid);
+  const appUrl = getAppUrl();
+  const title = input.event === "created" ? "Votre ticket support est ouvert" : "Votre réponse est transmise";
+  const body = `<p>Bonjour ${escapeHtml(input.contactName || " ")},</p>
+<p>${input.event === "created" ? "Nous avons reçu votre demande." : "Votre réponse a bien été ajoutée au ticket."}</p>
+<p>Ticket: <strong>${escapeHtml(ticketLabel)}</strong><br />
+Objet: <strong>${escapeHtml(input.subject)}</strong><br />
+Catégorie: <strong>${escapeHtml(supportCategoryLabel(input.category))}</strong></p>`;
+
+  return sendEmail({
+    to: uniqueRecipients(input.to),
+    subject: `Ticket NeuroRecrut ${ticketLabel} - confirmation`,
+    text: `Votre message pour le ticket ${ticketLabel} a bien été transmis.`,
+    html: emailShell(title, body, { label: "Suivre le ticket", href: `${appUrl}/company/support/${input.ticketUid}` })
+  });
+}
+
+export async function sendSupportTicketAdminReplyEmail(input: SupportTicketEmailInput) {
+  const ticketLabel = supportTicketLabel(input.ticketCode, input.ticketUid);
+  const appUrl = getAppUrl();
+  const title = "Nouvelle réponse du support NeuroRecrut";
+  const body = `<p>Bonjour ${escapeHtml(input.contactName || " ")},</p>
+<p>Le support NeuroRecrut a répondu à votre ticket <strong>${escapeHtml(ticketLabel)}</strong>.</p>
+<p style="margin-top:18px"><strong>Réponse</strong></p>
+<p>${htmlLines(input.message)}</p>`;
+
+  return sendEmail({
+    to: uniqueRecipients(input.to),
+    subject: `Réponse support NeuroRecrut - ${input.subject}`,
+    text: `Réponse du support sur le ticket ${ticketLabel}:\n${input.message}`,
+    html: emailShell(title, body, { label: "Ouvrir le ticket", href: `${appUrl}/company/support/${input.ticketUid}` })
   });
 }

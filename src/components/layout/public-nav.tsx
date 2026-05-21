@@ -10,6 +10,9 @@ export function PublicNav() {
           <Link className="hidden rounded-md px-3 py-2 font-medium text-graphite hover:bg-mist sm:inline-flex" href="/pricing">
             Tarifs
           </Link>
+          <Link className="hidden rounded-md px-3 py-2 font-medium text-graphite hover:bg-mist lg:inline-flex" href="/contact">
+            Contact
+          </Link>
           <Link className="rounded-md px-3 py-2 font-medium text-graphite hover:bg-mist" href="/login">
             Connexion
           </Link>

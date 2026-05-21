@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Building2, ClipboardList, CreditCard, FileText, ListChecks, Receipt, ScrollText, Sparkles, Users } from "lucide-react";
+import { Activity, Building2, ClipboardList, CreditCard, FileText, Headset, ListChecks, Receipt, ScrollText, Sparkles, Users } from "lucide-react";
 import { ResponsiveSidebar } from "@/components/layout/responsive-sidebar";
 
 const links = [
@@ -13,6 +13,7 @@ const links = [
   { href: "/admin/evaluations", label: "Évaluations", icon: ScrollText },
   { href: "/admin/responses", label: "Réponses", icon: ClipboardList },
   { href: "/admin/reports", label: "Rapports", icon: FileText },
+  { href: "/admin/tickets", label: "Tickets support", icon: Headset },
   { href: "/admin/ai-logs", label: "Logs IA", icon: Sparkles }
 ];
 

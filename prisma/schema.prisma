@@ -65,6 +65,48 @@ enum RiskLevel {
   HIGH
 }
 
+enum ContactRequestCategory {
+  COMPANY
+  CANDIDATE
+  PARTNERSHIP
+  PRESS
+  DATA_PRIVACY
+  TECHNICAL
+  OTHER
+}
+
+enum SupportTicketCategory {
+  EVALUATION
+  CANDIDATE_INVITATION
+  REPORT
+  BILLING
+  ACCOUNT_ACCESS
+  DATA_PRIVACY
+  TECHNICAL
+  FEATURE_REQUEST
+  OTHER
+}
+
+enum SupportTicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_COMPANY
+  RESOLVED
+  CLOSED
+}
+
+enum SupportMessageAuthorRole {
+  COMPANY
+  ADMIN
+}
+
 model User {
   id           String    @id @default(cuid())
   uid          String    @unique @default(cuid())
@@ -81,6 +123,9 @@ model User {
   candidate    Candidate? @relation(fields: [candidateId], references: [id])
   generatedEvaluations Evaluation[] @relation("GeneratedBy")
   createdInvitations   EvaluationInvitation[] @relation("CreatedInvitations")
+  createdSupportTickets SupportTicket[] @relation("CreatedSupportTickets")
+  assignedSupportTickets SupportTicket[] @relation("AssignedSupportTickets")
+  supportMessages SupportTicketMessage[]
   auditLogs     AuditLog[]
 
   @@index([role])
@@ -119,6 +164,7 @@ model Company {
   responses           CandidateResponse[]
   reports             AnalysisReport[]
   aiLogs              AiLog[]
+  supportTickets      SupportTicket[]
   auditLogs           AuditLog[]
 
   @@index([status])
@@ -159,6 +205,7 @@ model JobPosition {
   responses                   CandidateResponse[]
   reports                     AnalysisReport[]
   aiLogs                      AiLog[]
+  supportTickets              SupportTicket[]
 
   @@index([companyId])
   @@index([status])
@@ -389,6 +436,76 @@ model AnalysisReport {
   @@index([jobId])
   @@index([matchingScore])
   @@index([riskLevel])
+}
+
+model ContactRequest {
+  id           String                 @id @default(cuid())
+  uid          String                 @unique @default(cuid())
+  category     ContactRequestCategory
+  firstName    String
+  lastName     String
+  email        String
+  phone        String?
+  organization String?
+  subject      String
+  message      String
+  detailsJson  Json?
+  createdAt    DateTime               @default(now())
+
+  @@index([category])
+  @@index([email])
+  @@index([createdAt])
+}
+
+model SupportTicket {
+  id              String                @id @default(cuid())
+  uid             String                @unique @default(cuid())
+  code            String?               @unique
+  companyId       String
+  jobId           String?
+  createdByUserId String?
+  assignedToUserId String?
+  contactName     String?
+  contactEmail    String
+  subject         String
+  category        SupportTicketCategory
+  priority        SupportTicketPriority @default(NORMAL)
+  status          SupportTicketStatus   @default(OPEN)
+  impact          String?
+  relatedUrl      String?
+  lastActivityAt  DateTime              @default(now())
+  resolvedAt      DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  company         Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  job             JobPosition?          @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  createdBy       User?                 @relation("CreatedSupportTickets", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  assignedTo      User?                 @relation("AssignedSupportTickets", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  messages        SupportTicketMessage[]
+
+  @@index([companyId])
+  @@index([jobId])
+  @@index([category])
+  @@index([status])
+  @@index([priority])
+  @@index([lastActivityAt])
+}
+
+model SupportTicketMessage {
+  id           String                   @id @default(cuid())
+  uid          String                   @unique @default(cuid())
+  ticketId     String
+  authorUserId String?
+  authorRole   SupportMessageAuthorRole
+  body         String
+  createdAt    DateTime                 @default(now())
+
+  ticket       SupportTicket            @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author       User?                    @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@index([createdAt])
 }
 
 model AiLog {

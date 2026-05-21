@@ -52,7 +52,16 @@ export const STATUS_LABELS: Record<string, string> = {
   EXPIRED: "Expiré",
   GENERATED: "Évaluation générée",
   PAID: "Payé",
-  PENDING: "En attente"
+  PENDING: "En attente",
+  OPEN: "Ouvert",
+  IN_PROGRESS: "En traitement",
+  WAITING_COMPANY: "Réponse attendue",
+  RESOLVED: "Résolu",
+  CLOSED: "Clôturé",
+  LOW: "Faible",
+  NORMAL: "Normale",
+  HIGH: "Élevée",
+  URGENT: "Urgente"
 };
 
 export const PRICING_SEED = [
