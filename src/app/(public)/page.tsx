@@ -2,15 +2,20 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
+  BarChart3,
   BrainCircuit,
   BriefcaseBusiness,
+  Building2,
   CheckCircle2,
   ClipboardCheck,
   Compass,
+  FileText,
   GitCompareArrows,
   Handshake,
+  Mail,
   MessageSquareMore,
   ShieldAlert,
+  Sparkles,
   TimerReset,
   UsersRound
 } from "lucide-react";
@@ -36,6 +41,44 @@ const analysisInputs = [
   "les contraintes du poste",
   "la dynamique de l'équipe",
   "le contexte managérial"
+];
+
+const workflowSteps = [
+  {
+    icon: Building2,
+    title: "Inscription entreprise",
+    text: "Créez l'espace RH et renseignez la culture, les valeurs, le management et l'environnement de travail."
+  },
+  {
+    icon: BriefcaseBusiness,
+    title: "Définition du poste",
+    text: "Cadrez les missions, les compétences, les contraintes, l'équipe et les attentes opérationnelles."
+  },
+  {
+    icon: Sparkles,
+    title: "Évaluation sur mesure",
+    text: "NeuroRecrut® construit une évaluation unique, adaptée au poste et au contexte réel de l'entreprise."
+  },
+  {
+    icon: Mail,
+    title: "Invitation candidat",
+    text: "Envoyez l'invitation sécurisée à chaque candidat depuis le panel entreprise."
+  },
+  {
+    icon: ClipboardCheck,
+    title: "Réponses à l'évaluation",
+    text: "Le candidat répond aux scénarios, questions contextualisées et mises en situation professionnelles."
+  },
+  {
+    icon: BarChart3,
+    title: "Analyse croisée",
+    text: "Les réponses sont analysées pour structurer la compatibilité poste, équipe et manager."
+  },
+  {
+    icon: FileText,
+    title: "Rapport RH",
+    text: "Recevez un rapport exploitable avec scores, points de vigilance, synthèse et recommandations."
+  }
 ];
 
 const evaluationDimensions = [
@@ -233,6 +276,46 @@ export default function HomePage() {
                 <span className="font-semibold text-gold">Objectif :</span> fournir des indicateurs d&apos;aide à la décision plus structurés, plus lisibles et plus exploitables.
               </p>
             </div>
+          </div>
+        </section>
+
+        <section className="border-b border-line bg-white">
+          <div className="mx-auto max-w-6xl px-4 py-14 md:py-20">
+            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+              <div className="max-w-3xl">
+                <p className="text-sm font-semibold uppercase tracking-wide text-coral">Le parcours NeuroRecrut</p>
+                <h2 className="mt-3 text-3xl font-bold text-ink md:text-4xl">
+                  De l&apos;inscription au rapport, un flux d&apos;évaluation complet.
+                </h2>
+                <p className="mt-4 leading-7 text-gray-600">
+                  Le processus relie les données entreprise, le besoin du poste, l&apos;expérience candidat et l&apos;analyse RH dans une seule chaîne lisible.
+                </p>
+              </div>
+              <Link href="/register" className="btn-secondary w-fit">
+                Démarrer gratuitement
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <ol className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {workflowSteps.map((step, index) => {
+                const Icon = step.icon;
+                return (
+                  <li key={step.title} className="relative rounded-lg border border-line bg-mist p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-md bg-white text-teal shadow-panel">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="rounded-full border border-line bg-white px-2.5 py-1 text-xs font-bold text-graphite">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+                    <h3 className="mt-5 font-semibold text-ink">{step.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-gray-600">{step.text}</p>
+                  </li>
+                );
+              })}
+            </ol>
           </div>
         </section>
 
