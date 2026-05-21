@@ -4,9 +4,9 @@ import { BrandLogo } from "@/components/layout/brand-logo";
 export function PublicNav() {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <BrandLogo priority />
-        <nav className="flex min-w-0 items-center gap-1 text-sm sm:gap-2" aria-label="Navigation publique">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-4">
+        <BrandLogo compact priority />
+        <nav className="flex min-w-0 items-center gap-0 text-sm sm:gap-2" aria-label="Navigation publique">
           <Link className="hidden rounded-md px-3 py-2 font-medium text-graphite hover:bg-mist sm:inline-flex" href="/pricing">
             Tarifs
           </Link>
@@ -16,8 +16,9 @@ export function PublicNav() {
           <Link className="hidden rounded-md px-3 py-2 font-medium text-graphite hover:bg-mist md:inline-flex" href="/candidate/register">
             Espace candidat
           </Link>
-          <Link className="btn-primary whitespace-nowrap" href="/register">
-            Créer un compte
+          <Link className="btn-primary whitespace-nowrap px-3 sm:px-4" href="/register">
+            <span className="sm:hidden">Créer</span>
+            <span className="hidden sm:inline">Créer un compte</span>
           </Link>
         </nav>
       </div>
