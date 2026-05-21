@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getCandidateComparisonData } from "@/actions/workflow";
 import { CandidateComparisonCharts } from "@/components/dashboard/company-charts";
-import { Badge } from "@/components/ui/badge";
+import { CompatibilityScore } from "@/components/ui/compatibility-score";
 import { CompanyAccessDenied } from "@/components/company/company-access-denied";
 
 export default async function ComparisonPage({ params }: { params: { jobUid: string } }) {
@@ -26,7 +26,7 @@ export default async function ComparisonPage({ params }: { params: { jobUid: str
               <th className="px-5 py-3">Matching</th>
               <th className="px-5 py-3">Cohérence</th>
               <th className="px-5 py-3">Sincérité</th>
-              <th className="px-5 py-3">Risque</th>
+              <th className="px-5 py-3">Compatibilité</th>
               <th className="px-5 py-3">Recommandation</th>
             </tr>
           </thead>
@@ -43,7 +43,7 @@ export default async function ComparisonPage({ params }: { params: { jobUid: str
                 <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}</td>
                 <td className="px-5 py-3" data-label="Cohérence">{Math.round(report.coherenceIndex)}</td>
                 <td className="px-5 py-3" data-label="Sincérité">{Math.round(report.sincerityIndex)}</td>
-                <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>
+                <td className="px-5 py-3" data-label="Compatibilité"><CompatibilityScore score={report.matchingScore} /></td>
                 <td className="px-5 py-3" data-label="Recommandation">{report.recommendation}</td>
               </tr>
             ))}

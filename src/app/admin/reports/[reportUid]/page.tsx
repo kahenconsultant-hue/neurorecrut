@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getAdminReportDetail } from "@/actions/workflow";
 import { AdminJsonBlock, AdminMetaGrid } from "@/components/admin/admin-json";
-import { Badge } from "@/components/ui/badge";
+import { CompatibilityScore } from "@/components/ui/compatibility-score";
 import { StatCard } from "@/components/ui/stat-card";
 import { formatDate } from "@/lib/format";
 
@@ -41,7 +41,7 @@ export default async function AdminReportDetailPage({ params }: { params: { repo
           ["Code poste", report.job.code ?? report.job.uid],
           ["Évaluation", <Link key="evaluation" href={`/admin/evaluations/${report.evaluation.uid}`} className="text-coral">{report.evaluation.version}</Link>],
           ["Réponse", <Link key="response" href={`/admin/responses/${report.response.uid}`} className="text-coral">{report.response.uid}</Link>],
-          ["Risque", <Badge key="risk" value={report.riskLevel} />],
+          ["Compatibilité", <CompatibilityScore key="compatibility" score={report.matchingScore} />],
           ["Recommandation", report.recommendation],
           ["Avis final", report.finalOpinion],
           ["PDF", report.pdfFileName ?? "Non généré"],

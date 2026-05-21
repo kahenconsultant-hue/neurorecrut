@@ -72,7 +72,7 @@ function isMirrorCoherent(
   if (currentSignal == null || mirrorSignal == null) return false;
 
   const delta = Math.abs(currentSignal - mirrorSignal);
-  return delta <= 35 || (currentSignal >= 65 && mirrorSignal >= 65) || (currentSignal <= 35 && mirrorSignal <= 35);
+  return delta <= 20;
 }
 
 export function recommendation(score: number) {
@@ -89,8 +89,8 @@ export function deriveRiskLevel(jobMatchingScore: number, coherenceIndex: number
   const normalizedSincerity = ((sincerity + 10) / 20) * 100;
   const compositeRisk = (100 - matching) * 0.5 + (100 - coherence) * 0.3 + (100 - normalizedSincerity) * 0.2;
 
-  if (matching < 50 || coherence < 35 || sincerity <= -9) return "HIGH";
-  if (compositeRisk >= 42 || matching < 70 || coherence < 70 || sincerity < -4) return "MEDIUM";
+  if (matching < 55 || coherence < 45 || sincerity <= -8) return "HIGH";
+  if (compositeRisk >= 40 || matching < 70 || coherence < 75 || sincerity < 0) return "MEDIUM";
   return "LOW";
 }
 

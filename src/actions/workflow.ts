@@ -936,8 +936,7 @@ export async function analyzeCandidateResponse(responseUid: string) {
     companyName: response.job.company.name,
     jobTitle: response.job.title,
     reportUid: report.uid,
-    matchingScore: report.matchingScore,
-    riskLevel: report.riskLevel
+    matchingScore: report.matchingScore
   });
 
   return report;

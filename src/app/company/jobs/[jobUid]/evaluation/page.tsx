@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCompanyUser } from "@/lib/security";
 import { CompanyAccessDenied } from "@/components/company/company-access-denied";
 import { Badge } from "@/components/ui/badge";
+import { CompatibilityScore } from "@/components/ui/compatibility-score";
 import type { EvaluationJson, QuestionType } from "@/types/evaluation";
 
 export default async function EvaluationPage({ params }: { params: { jobUid: string } }) {
@@ -99,14 +100,14 @@ export default async function EvaluationPage({ params }: { params: { jobUid: str
             </div>
             <table className="responsive-table">
               <thead className="bg-mist text-gray-500">
-                <tr><th className="px-5 py-3">Candidat</th><th className="px-5 py-3">Matching</th><th className="px-5 py-3">Risque</th><th className="px-5 py-3">Rapport</th></tr>
+                <tr><th className="px-5 py-3">Candidat</th><th className="px-5 py-3">Matching</th><th className="px-5 py-3">Compatibilité</th><th className="px-5 py-3">Rapport</th></tr>
               </thead>
               <tbody>
                 {job.reports.map((report) => (
                   <tr key={report.id} className="border-t border-line">
                     <td className="px-5 py-3" data-label="Candidat">{report.candidate.firstName} {report.candidate.lastName}</td>
                     <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}/100</td>
-                    <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>
+                    <td className="px-5 py-3" data-label="Compatibilité"><CompatibilityScore score={report.matchingScore} /></td>
                     <td className="px-5 py-3" data-label="Rapport"><Link className="font-semibold text-coral" href={`/company/reports/${report.uid}`}>Ouvrir</Link></td>
                   </tr>
                 ))}

@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { getAppUrl } from "@/lib/app-url";
+import { formatCompatibilityScore } from "@/lib/format";
 
 type EmailAddress = string | null | undefined;
 
@@ -53,7 +54,6 @@ type ReportReadyInput = {
   jobTitle: string;
   reportUid: string;
   matchingScore: number;
-  riskLevel: string;
 };
 
 let transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo> | null = null;
@@ -260,13 +260,13 @@ export async function sendCandidateSubmissionEmail({ to, firstName, companyName,
   });
 }
 
-export async function sendReportReadyEmail({ to, candidateName, companyName, jobTitle, reportUid, matchingScore, riskLevel }: ReportReadyInput) {
+export async function sendReportReadyEmail({ to, candidateName, companyName, jobTitle, reportUid, matchingScore }: ReportReadyInput) {
   const appUrl = getAppUrl();
   const href = `${appUrl}/company/reports/${reportUid}`;
   const title = "Rapport candidat disponible";
   const body = `<p>Le rapport NeuroRecrut est disponible pour <strong>${escapeHtml(candidateName)}</strong>.</p>
 <p>Poste: <strong>${escapeHtml(jobTitle)}</strong>${companyName ? ` · Entreprise: <strong>${escapeHtml(companyName)}</strong>` : ""}</p>
-<p>Matching: <strong>${Math.round(matchingScore)}/100</strong> · Niveau de risque: <strong>${escapeHtml(riskLevel)}</strong></p>`;
+<p>Matching: <strong>${Math.round(matchingScore)}/100</strong> · Compatibilité: <strong>${escapeHtml(formatCompatibilityScore(matchingScore))}</strong></p>`;
 
   return sendEmail({
     to: uniqueRecipients(to),

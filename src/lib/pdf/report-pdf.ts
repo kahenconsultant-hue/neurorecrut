@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import PDFDocument from "pdfkit";
+import { formatCompatibilityScore } from "@/lib/format";
 
 const COLORS = {
   ink: "#111827",
@@ -24,7 +25,7 @@ const LABELS: Record<string, string> = {
   block_scores: "Scores par bloc",
   soft_skill_scores: "Scores soft skills",
   hard_skill_score: "Score hard skills",
-  risk_level: "Niveau de risque",
+  compatibility_score: "Compatibilité",
   recommendation: "Recommandation",
   final_opinion: "Avis final",
   qualitative: "Analyse qualitative",
@@ -338,7 +339,7 @@ function cleanValue(value: unknown, key?: string): unknown {
       sincerity_index: source.sincerity_index,
       coherence_index: source.coherence_index,
       hard_skill_score: source.hard_skill_score,
-      risk_level: source.risk_level,
+      compatibility_score: source.job_matching_score != null ? formatCompatibilityScore(numberValue(source.job_matching_score)) : undefined,
       recommendation: source.recommendation,
       final_opinion: source.final_opinion
     };

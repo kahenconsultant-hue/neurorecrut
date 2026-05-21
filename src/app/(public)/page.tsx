@@ -128,11 +128,11 @@ export default function HomePage() {
                       <p className="mt-2 text-sm text-gray-600">86/100 - Matching solide</p>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-ink">Risque RH</p>
+                      <p className="text-sm font-semibold text-ink">Compatibilité</p>
                       <div className="mt-3 h-3 rounded-full bg-mist">
-                        <div className="h-3 w-[28%] rounded-full bg-gold" />
+                        <div className="h-3 w-[86%] rounded-full bg-gold" />
                       </div>
-                      <p className="mt-2 text-sm text-gray-600">Faible à modéré</p>
+                      <p className="mt-2 text-sm text-gray-600">4,30/5 - Ajustée au poste</p>
                     </div>
                   </div>
                   <div className="mt-6 grid gap-2">

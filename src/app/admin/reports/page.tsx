@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getAdminDashboardData } from "@/actions/workflow";
 import { AdminFilterBar } from "@/components/admin/admin-filter-bar";
-import { Badge } from "@/components/ui/badge";
+import { CompatibilityScore } from "@/components/ui/compatibility-score";
 import { getParam, matchesDateRange, matchesQuery, matchesSelect, uniqueOptions, type AdminSearchParams } from "@/lib/admin-filters";
 
 export default async function AdminReportsPage({ searchParams }: { searchParams?: AdminSearchParams }) {
@@ -22,7 +22,6 @@ export default async function AdminReportsPage({ searchParams }: { searchParams?
         report.recommendation
       ]) &&
       matchesSelect(getParam(searchParams, "company"), report.company.name ?? report.company.uid) &&
-      matchesSelect(getParam(searchParams, "risk"), report.riskLevel) &&
       matchesDateRange(report.createdAt, getParam(searchParams, "from"), getParam(searchParams, "to"))
     );
   });
@@ -38,8 +37,7 @@ export default async function AdminReportsPage({ searchParams }: { searchParams?
         resultCount={filteredReports.length}
         placeholder="Entreprise, poste, candidat, recommandation..."
         selects={[
-          { name: "company", label: "Entreprise", options: uniqueOptions(data.reports.map((report) => report.company.name ?? report.company.uid)) },
-          { name: "risk", label: "Risque", options: uniqueOptions(data.reports.map((report) => report.riskLevel)) }
+          { name: "company", label: "Entreprise", options: uniqueOptions(data.reports.map((report) => report.company.name ?? report.company.uid)) }
         ]}
       />
 
@@ -52,7 +50,7 @@ export default async function AdminReportsPage({ searchParams }: { searchParams?
               <th className="px-5 py-3">Candidat</th>
               <th className="px-5 py-3">Global</th>
               <th className="px-5 py-3">Matching</th>
-              <th className="px-5 py-3">Risque</th>
+              <th className="px-5 py-3">Compatibilité</th>
               <th className="px-5 py-3">Actions</th>
             </tr>
           </thead>
@@ -67,7 +65,7 @@ export default async function AdminReportsPage({ searchParams }: { searchParams?
                 </td>
                 <td className="px-5 py-3" data-label="Global">{Math.round(report.globalScore)}/100</td>
                 <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}/100</td>
-                <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>
+                <td className="px-5 py-3" data-label="Compatibilité"><CompatibilityScore score={report.matchingScore} /></td>
                 <td className="px-5 py-3" data-label="Actions">
                   <div className="flex flex-wrap gap-3">
                     <Link className="text-coral" href={`/admin/reports/${report.uid}`}>Admin</Link>

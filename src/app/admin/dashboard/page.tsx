@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getAdminDashboardData } from "@/actions/workflow";
 import { Badge } from "@/components/ui/badge";
+import { CompatibilityScore } from "@/components/ui/compatibility-score";
 import { StatCard } from "@/components/ui/stat-card";
 import { formatCurrency, formatDate } from "@/lib/format";
 
@@ -105,7 +106,7 @@ export default async function AdminDashboardPage() {
                 <th className="px-5 py-3">Poste</th>
                 <th className="px-5 py-3">Candidat</th>
                 <th className="px-5 py-3">Matching</th>
-                <th className="px-5 py-3">Risque</th>
+                <th className="px-5 py-3">Compatibilité</th>
               </tr>
             </thead>
             <tbody>
@@ -121,7 +122,7 @@ export default async function AdminDashboardPage() {
                     <p className="font-mono text-xs text-gray-400">{report.code ?? report.uid}</p>
                   </td>
                   <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}/100</td>
-                  <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>
+                  <td className="px-5 py-3" data-label="Compatibilité"><CompatibilityScore score={report.matchingScore} /></td>
                 </tr>
               ))}
             </tbody>

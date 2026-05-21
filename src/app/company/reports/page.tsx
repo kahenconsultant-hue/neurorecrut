@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCompanyUser } from "@/lib/security";
-import { Badge } from "@/components/ui/badge";
+import { CompatibilityScore } from "@/components/ui/compatibility-score";
 import { formatDate } from "@/lib/format";
 
 export default async function CompanyReportsPage() {
@@ -55,7 +55,7 @@ export default async function CompanyReportsPage() {
                 <th className="px-5 py-3">Candidat</th>
                 <th className="px-5 py-3">Poste</th>
                 <th className="px-5 py-3">Matching</th>
-                <th className="px-5 py-3">Risque</th>
+                <th className="px-5 py-3">Compatibilité</th>
                 <th className="px-5 py-3">Date</th>
                 <th className="px-5 py-3">Rapport</th>
               </tr>
@@ -70,7 +70,7 @@ export default async function CompanyReportsPage() {
                   </td>
                   <td className="px-5 py-3" data-label="Poste">{report.job.title}</td>
                   <td className="px-5 py-3" data-label="Matching">{Math.round(report.matchingScore)}/100</td>
-                  <td className="px-5 py-3" data-label="Risque"><Badge value={report.riskLevel} /></td>
+                  <td className="px-5 py-3" data-label="Compatibilité"><CompatibilityScore score={report.matchingScore} /></td>
                   <td className="px-5 py-3" data-label="Date">{formatDate(report.createdAt)}</td>
                   <td className="px-5 py-3" data-label="Rapport">
                     <Link className="font-semibold text-coral" href={`/company/reports/${report.uid}`}>Ouvrir</Link>

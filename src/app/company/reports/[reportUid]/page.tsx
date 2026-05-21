@@ -4,7 +4,8 @@ import { AlertTriangle, BarChart3, Brain, CheckCircle2, FileDown, Gauge, HeartPu
 import { prisma } from "@/lib/prisma";
 import { assertCompanyAccess } from "@/lib/security";
 import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/format";
+import { CompatibilityScore } from "@/components/ui/compatibility-score";
+import { formatCompatibilityScore, formatDate } from "@/lib/format";
 
 const sectionMeta: Record<string, { title: string; icon: typeof Target }> = {
   contexte_objectif: { title: "Contexte & objectif", icon: Target },
@@ -34,7 +35,7 @@ const fieldLabels: Record<string, string> = {
   block_scores: "Scores par bloc",
   soft_skill_scores: "Scores soft skills",
   hard_skill_score: "Score hard skills",
-  risk_level: "Niveau de risque",
+  compatibility_score: "Compatibilité",
   recommendation: "Recommandation",
   final_opinion: "Avis final",
   strengths: "Forces",
@@ -60,7 +61,7 @@ function cleanReportValue(value: unknown, key?: string): unknown {
       sincerity_index: source.sincerity_index,
       coherence_index: source.coherence_index,
       hard_skill_score: source.hard_skill_score,
-      risk_level: source.risk_level,
+      compatibility_score: source.job_matching_score != null ? formatCompatibilityScore(Number(source.job_matching_score)) : undefined,
       recommendation: source.recommendation,
       final_opinion: source.final_opinion
     };
@@ -249,9 +250,10 @@ export default async function ReportPage({ params }: { params: { reportUid: stri
           { label: "Sincérité", value: Math.max(0, (report.sincerityIndex + 10) * 5), tone: "coral" as const, icon: ShieldCheck }
         ].map(({ label, value, tone, icon: Icon }) => (
           <div key={label} className="panel p-5">
-            <div className="flex items-center justify-between">
+            <div className="flex min-h-6 items-center justify-between">
               <Icon className="h-5 w-5 text-coral" />
-              <Badge value={label === "Sincérité" ? `${Math.round(report.sincerityIndex)}/10` : report.riskLevel} />
+              {label === "Sincérité" ? <Badge value={`${Math.round(report.sincerityIndex)}/10`} /> : null}
+              {label === "Matching" ? <CompatibilityScore score={report.matchingScore} /> : null}
             </div>
             <p className="mt-5 text-sm text-gray-500">{label}</p>
             <p className="mt-1 text-3xl font-bold text-ink">{label === "Sincérité" ? Math.round(report.sincerityIndex) : Math.round(value)}</p>
@@ -280,7 +282,7 @@ export default async function ReportPage({ params }: { params: { reportUid: stri
           </div>
           <p className="mt-4 text-2xl font-bold text-ink">{report.finalOpinion}</p>
           <p className="mt-2 text-sm leading-6 text-gray-700">{report.recommendation}</p>
-          <div className="mt-4"><Badge value={report.riskLevel} /></div>
+          <div className="mt-4"><CompatibilityScore score={report.matchingScore} /></div>
         </div>
       </section>
 
