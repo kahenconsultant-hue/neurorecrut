@@ -22,9 +22,12 @@ export default function RegisterPage({ searchParams }: { searchParams?: { error?
       <main className="mx-auto min-h-[calc(100vh-73px)] max-w-6xl px-4 py-10">
         <form action={registerCompanyUser.bind(null, null)} className="panel w-full space-y-8 p-6 md:p-8">
           <div>
-            <h1 className="text-2xl font-bold text-ink">Créer un compte entreprise</h1>
+            <h1 className="text-2xl font-bold text-ink">Créer un compte recruteur</h1>
             <p className="mt-2 text-sm text-gray-600">
               Le profil entreprise est obligatoire dès l&apos;inscription: il sert à contextualiser les postes, les évaluations et les rapports.
+            </p>
+            <p className="mt-2 text-sm font-medium text-teal">
+              Première évaluation offerte pour les nouveaux comptes recruteurs, valable jusqu&apos;au 15 juin 2026.
             </p>
           </div>
           {error ? <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
@@ -93,6 +96,7 @@ export default function RegisterPage({ searchParams }: { searchParams?: { error?
                   Secteur
                 </label>
                 <select className="field" id="sector" name="sector" required>
+                  <option value="">Sélectionner un secteur</option>
                   {COMPANY_SECTOR_OPTIONS.map((option) => (
                     <option key={option}>{option}</option>
                   ))}
@@ -103,6 +107,7 @@ export default function RegisterPage({ searchParams }: { searchParams?: { error?
                   Taille
                 </label>
                 <select className="field" id="size" name="size" required>
+                  <option value="">Sélectionner une taille</option>
                   {COMPANY_SIZE_OPTIONS.map((option) => (
                     <option key={option}>{option}</option>
                   ))}
@@ -142,7 +147,7 @@ export default function RegisterPage({ searchParams }: { searchParams?: { error?
             </div>
             <div className="grid gap-4">
               {COMPANY_PROFILE_CHOICE_GROUPS.map((group) => (
-                <ChoiceGroup key={group.name} {...group} defaultFirst />
+                <ChoiceGroup key={group.name} {...group} />
               ))}
             </div>
           </section>
@@ -150,7 +155,7 @@ export default function RegisterPage({ searchParams }: { searchParams?: { error?
           <CompanyLegalConsents />
 
           <button className="btn-primary w-full" type="submit">
-            Créer le compte et le profil entreprise
+            Créer le compte recruteur
           </button>
         </form>
       </main>

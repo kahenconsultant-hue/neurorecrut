@@ -15,6 +15,7 @@ type JobDefaults = {
   workMode?: string;
   teamContext?: string;
   managerProfile?: string;
+  reportingLine?: string | null;
   managementStyle?: string;
   workRhythm?: string;
   mainConstraints?: string;
@@ -46,7 +47,8 @@ export function JobForm({ job }: { job?: JobDefaults }) {
             {type === "textarea" ? (
               <textarea className="field min-h-28" id={name} name={name} defaultValue={String(job?.[name] ?? "")} required />
             ) : type === "select" ? (
-              <select className="field" id={name} name={name} defaultValue={String(job?.[name] ?? options?.[0] ?? "")} required>
+              <select className="field" id={name} name={name} defaultValue={String(job?.[name] ?? "")} required>
+                <option value="">Sélectionner</option>
                 {options?.map((option) => (
                   <option key={option}>{option}</option>
                 ))}
@@ -71,7 +73,6 @@ export function JobForm({ job }: { job?: JobDefaults }) {
               key={group.name}
               {...group}
               defaultValue={String(job?.[group.name as keyof JobDefaults] ?? "")}
-              defaultFirst
             />
           ))}
         </div>

@@ -16,7 +16,10 @@ export default async function JobDetailPage({ params }: { params: { jobUid: stri
     where: {
       companyId: job.companyId,
       active: true,
-      OR: [{ jobId: job.id }, { jobId: null }]
+      OR: [{ periodEnd: null }, { periodEnd: { gt: new Date() } }],
+      AND: [
+        { OR: [{ jobId: job.id }, { jobId: null }] }
+      ]
     }
   });
   const credits = usableCredits.reduce((sum, item) => sum + item.creditsPurchased - item.creditsUsed, 0);
@@ -39,6 +42,12 @@ export default async function JobDetailPage({ params }: { params: { jobUid: stri
         <StatCard label="Invitations" value={job.invitations.length} />
         <StatCard label="Rapports" value={job.reports.length} />
       </div>
+      {job.reportingLine ? (
+        <section className="panel p-5">
+          <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">Circuit de reporting</p>
+          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-ink">{job.reportingLine}</p>
+        </section>
+      ) : null}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[
           ["Profil cible", `/company/jobs/${job.uid}/target-profile`, "Générer ou consulter les attentes structurées."],

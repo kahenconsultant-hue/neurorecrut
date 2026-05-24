@@ -57,6 +57,7 @@ export const jobPositionSchema = z.object({
   workMode: z.string().min(1),
   teamContext: z.string().min(5),
   managerProfile: z.string().min(5),
+  reportingLine: z.string().min(1),
   managementStyle: z.string().min(5),
   workRhythm: z.string().min(5),
   mainConstraints: z.string().min(5),

@@ -8,7 +8,14 @@ export default async function CompanyBillingPage() {
   const { company } = await requireCompanyUser();
   const [plans, credits, purchases] = await Promise.all([
     prisma.pricingPlan.findMany({ where: { active: true }, orderBy: { priceCents: "asc" } }),
-    prisma.creditBalance.findMany({ where: { companyId: company?.id, active: true }, include: { job: true, plan: true } }),
+    prisma.creditBalance.findMany({
+      where: {
+        companyId: company?.id,
+        active: true,
+        OR: [{ periodEnd: null }, { periodEnd: { gt: new Date() } }]
+      },
+      include: { job: true, plan: true }
+    }),
     prisma.purchase.findMany({ where: { companyId: company?.id }, include: { plan: true, job: true }, orderBy: { createdAt: "desc" } })
   ]);
 
@@ -43,6 +50,7 @@ export default async function CompanyBillingPage() {
                 <td className="px-5 py-3" data-label="Plan">{credit.plan?.name ?? "Crédits manuels"}</td>
                 <td className="px-5 py-3" data-label="Poste">{credit.job?.title ?? "Global entreprise"}</td>
                 <td className="px-5 py-3" data-label="Crédits">{credit.creditsPurchased - credit.creditsUsed} restants</td>
+                <td className="px-5 py-3" data-label="Validité">{credit.periodEnd ? `Jusqu'au ${formatDate(credit.periodEnd)}` : "Sans limite"}</td>
               </tr>
             ))}
           </tbody>

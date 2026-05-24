@@ -39,7 +39,8 @@ export default async function CompanyProfilePage({ searchParams }: { searchParam
             <label className="label" htmlFor="sector">
               Secteur
             </label>
-            <select className="field" id="sector" name="sector" defaultValue={String(company?.sector ?? COMPANY_SECTOR_OPTIONS[0])} required>
+            <select className="field" id="sector" name="sector" defaultValue={String(company?.sector ?? "")} required>
+              <option value="">Sélectionner un secteur</option>
               {COMPANY_SECTOR_OPTIONS.map((option) => (
                 <option key={option}>{option}</option>
               ))}
@@ -49,7 +50,8 @@ export default async function CompanyProfilePage({ searchParams }: { searchParam
             <label className="label" htmlFor="size">
               Taille
             </label>
-            <select className="field" id="size" name="size" defaultValue={String(company?.size ?? COMPANY_SIZE_OPTIONS[0])} required>
+            <select className="field" id="size" name="size" defaultValue={String(company?.size ?? "")} required>
+              <option value="">Sélectionner une taille</option>
               {COMPANY_SIZE_OPTIONS.map((option) => (
                 <option key={option}>{option}</option>
               ))}
@@ -58,7 +60,7 @@ export default async function CompanyProfilePage({ searchParams }: { searchParam
         </div>
         <div className="grid gap-4">
           {COMPANY_PROFILE_CHOICE_GROUPS.map((group) => (
-            <ChoiceGroup key={group.name} {...group} defaultValue={String(company?.[group.name] ?? "")} defaultFirst />
+            <ChoiceGroup key={group.name} {...group} defaultValue={String(company?.[group.name] ?? "")} />
           ))}
         </div>
         <button className="btn-primary" type="submit">Enregistrer</button>

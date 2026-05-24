@@ -12,7 +12,10 @@ export default async function JobBillingPage({ params }: { params: { jobUid: str
   });
   if (job.companyId !== company?.id) return <CompanyAccessDenied />;
   const plans = await prisma.pricingPlan.findMany({ where: { active: true, jobScoped: true }, orderBy: { priceCents: "asc" } });
-  const remaining = job.creditBalances.reduce((sum, item) => sum + item.creditsPurchased - item.creditsUsed, 0);
+  const now = new Date();
+  const remaining = job.creditBalances
+    .filter((item) => !item.periodEnd || item.periodEnd > now)
+    .reduce((sum, item) => sum + item.creditsPurchased - item.creditsUsed, 0);
 
   async function checkout(formData: FormData) {
     "use server";

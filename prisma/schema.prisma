@@ -185,6 +185,7 @@ model JobPosition {
   workMode                    String
   teamContext                 String
   managerProfile              String
+  reportingLine               String?
   managementStyle             String
   workRhythm                  String
   mainConstraints             String

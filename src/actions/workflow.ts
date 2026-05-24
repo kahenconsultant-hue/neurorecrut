@@ -82,6 +82,9 @@ function nullableFormString(formData: FormData, key: string) {
   return value.length > 0 ? value : null;
 }
 
+const FREE_FIRST_EVALUATION_EXPIRES_AT = new Date("2026-06-15T23:59:59.999+02:00");
+const EVALUATION_TIME_LIMIT_MINUTES = 75;
+
 function adminDateInput(formData: FormData, key: string) {
   const value = formString(formData, key);
   if (!value) return undefined;
@@ -125,6 +128,7 @@ function buildJobPayload(formData: FormData) {
     workMode: formText(formData, "workMode"),
     teamContext: formText(formData, "teamContext"),
     managerProfile: formText(formData, "managerProfile"),
+    reportingLine: formText(formData, "reportingLine"),
     managementStyle: formText(formData, "managementStyle"),
     workRhythm: formText(formData, "workRhythm"),
     mainConstraints: formText(formData, "mainConstraints"),
@@ -187,15 +191,27 @@ async function getCompanyJob(jobUid: string) {
 }
 
 async function findCreditBalance(companyId: string, jobId?: string) {
+  const now = new Date();
   const balances = await prisma.creditBalance.findMany({
     where: {
       companyId,
       active: true,
-      OR: [{ jobId }, { jobId: null }]
+      OR: [
+        { periodEnd: null },
+        { periodEnd: { gt: now } }
+      ],
+      AND: [
+        { OR: [{ jobId }, { jobId: null }] }
+      ]
     },
     orderBy: [{ jobId: "desc" }, { createdAt: "asc" }]
   });
   return balances.find((balance) => balance.creditsPurchased - balance.creditsUsed > 0);
+}
+
+function evaluationDeadline(startedAt: Date | null | undefined) {
+  if (!startedAt) return null;
+  return new Date(startedAt.getTime() + EVALUATION_TIME_LIMIT_MINUTES * 60_000);
 }
 
 export async function createCompanyProfile(_: unknown, formData: FormData) {
@@ -300,6 +316,7 @@ export async function generateTargetProfile(jobUid: string) {
     seniorityLevel: job.seniorityLevel,
     teamContext: job.teamContext,
     managerProfile: job.managerProfile,
+    reportingLine: job.reportingLine ?? "",
     managementStyle: job.managementStyle,
     workRhythm: job.workRhythm,
     mainConstraints: job.mainConstraints,
@@ -469,6 +486,7 @@ export async function generateEvaluation(jobUid: string) {
     softSkillMatrix: freshJob.softSkillMatrix,
     teamContext: freshJob.teamContext,
     managerProfile: freshJob.managerProfile,
+    reportingLine: freshJob.reportingLine ?? "",
     workConstraints: freshJob.mainConstraints
   };
 
@@ -594,6 +612,10 @@ export async function validateInvitation(invitationUid: string, options?: { allo
   }
   if (!invitation.evaluation) throw new Error("Évaluation introuvable");
   if (invitation.response?.isSubmitted && !options?.allowSubmitted) throw new Error("Évaluation déjà soumise");
+  const deadline = evaluationDeadline(invitation.startedAt);
+  if (deadline && deadline.getTime() + 60_000 < Date.now() && !invitation.response?.isSubmitted) {
+    throw new Error("Temps imparti écoulé. Contactez l'entreprise si vous devez relancer l'évaluation.");
+  }
   const balance = await findCreditBalance(invitation.companyId, invitation.jobId);
   if (!balance) throw new Error("Aucun crédit disponible. L'entreprise doit recharger ses crédits.");
   return invitation;
@@ -769,11 +791,13 @@ export async function submitCandidateResponse(invitationUid: string, payload: un
     const existing = await tx.candidateResponse.findUnique({ where: { invitationId: invitation.id } });
     if (existing?.isSubmitted) throw new Error("Réponse déjà soumise");
 
+    const now = new Date();
     const balances = await tx.creditBalance.findMany({
       where: {
         companyId: invitation.companyId,
         active: true,
-        OR: [{ jobId: invitation.jobId }, { jobId: null }]
+        OR: [{ periodEnd: null }, { periodEnd: { gt: now } }],
+        AND: [{ OR: [{ jobId: invitation.jobId }, { jobId: null }] }]
       },
       orderBy: [{ jobId: "desc" }, { createdAt: "asc" }]
     });
@@ -975,8 +999,10 @@ export async function getCompanyDashboardData() {
     prisma.evaluationInvitation.findMany({ where: { companyId: company.id } })
   ]);
 
-  const creditsPurchased = credits.reduce((sum, item) => sum + item.creditsPurchased, 0);
-  const creditsUsed = credits.reduce((sum, item) => sum + item.creditsUsed, 0);
+  const now = new Date();
+  const activeCredits = credits.filter((item) => !item.periodEnd || item.periodEnd > now);
+  const creditsPurchased = activeCredits.reduce((sum, item) => sum + item.creditsPurchased, 0);
+  const creditsUsed = activeCredits.reduce((sum, item) => sum + item.creditsUsed, 0);
   return {
     company,
     jobs,

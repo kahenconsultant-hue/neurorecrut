@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { CandidateAnswer, QuestionType } from "@/types/evaluation";
 
@@ -27,11 +27,15 @@ export function CandidateEvaluationForm({
   invitationUid,
   blocks,
   initialAnswers,
+  deadlineAt,
+  timeLimitMinutes,
   context
 }: {
   invitationUid: string;
   blocks: PublicBlock[];
   initialAnswers: CandidateAnswer[];
+  deadlineAt: string;
+  timeLimitMinutes: number;
   context: {
     companyName: string;
     jobTitle: string;
@@ -50,12 +54,21 @@ export function CandidateEvaluationForm({
   const [saveState, setSaveState] = useState("Brouillon sauvegardé");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const deadlineMs = useMemo(() => new Date(deadlineAt).getTime(), [deadlineAt]);
+  const [remainingSeconds, setRemainingSeconds] = useState(() => Math.max(0, Math.ceil((deadlineMs - Date.now()) / 1000)));
+  const autoSubmitAttempted = useRef(false);
   const questions = useMemo(() => blocks.flatMap((block) => block.questions), [blocks]);
   const answeredCount = questions.filter((question) => {
     const answer = answers[question.question_uid];
     return Boolean(answer?.selected_choice_uid || answer?.text_answer?.trim());
   }).length;
   const progress = questions.length ? Math.round((answeredCount / questions.length) * 100) : 0;
+  const timerLabel = useMemo(() => {
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }, [remainingSeconds]);
+  const timeExpired = remainingSeconds <= 0;
 
   function updateAnswer(question: PublicQuestion, value: string, mode: "choice" | "text") {
     setAnswers((current) => ({
@@ -89,9 +102,46 @@ export function CandidateEvaluationForm({
     return () => clearTimeout(timeout);
   }, [answers, invitationUid]);
 
-  function submit() {
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setRemainingSeconds(Math.max(0, Math.ceil((deadlineMs - Date.now()) / 1000)));
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [deadlineMs]);
+
+  useEffect(() => {
+    function blockShortcut(event: KeyboardEvent) {
+      const key = event.key.toLowerCase();
+      const blockedCombo = (event.metaKey || event.ctrlKey) && ["a", "c", "p", "s", "u"].includes(key);
+      if (blockedCombo || event.key === "PrintScreen") {
+        event.preventDefault();
+        setError("Pour préserver l'intégrité de l'évaluation, la copie, l'impression et certaines captures sont désactivées.");
+      }
+    }
+
+    function blockClipboard(event: ClipboardEvent) {
+      event.preventDefault();
+      setError("La copie du contenu de l'évaluation est désactivée.");
+    }
+
+    document.addEventListener("keydown", blockShortcut);
+    document.addEventListener("copy", blockClipboard);
+    document.addEventListener("cut", blockClipboard);
+    return () => {
+      document.removeEventListener("keydown", blockShortcut);
+      document.removeEventListener("copy", blockClipboard);
+      document.removeEventListener("cut", blockClipboard);
+    };
+  }, []);
+
+  const submit = useCallback((force = false) => {
     setError(null);
-    if (answeredCount < questions.length && !window.confirm("Certaines questions sont sans réponse. Soumettre quand même ?")) {
+    if (timeExpired && !force) {
+      setError("Temps imparti écoulé. Les réponses enregistrées vont être transmises automatiquement.");
+      return;
+    }
+    if (!force && answeredCount < questions.length && !window.confirm("Certaines questions sont sans réponse. Soumettre quand même ?")) {
       return;
     }
 
@@ -108,10 +158,26 @@ export function CandidateEvaluationForm({
       }
       router.push("/candidate/thank-you");
     });
-  }
+  }, [answeredCount, answers, invitationUid, questions.length, router, startTransition, timeExpired]);
+
+  useEffect(() => {
+    if (remainingSeconds > 0 || autoSubmitAttempted.current || isPending) return;
+    autoSubmitAttempted.current = true;
+    submit(true);
+  }, [remainingSeconds, isPending, submit]);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
+    <div
+      className="mx-auto max-w-4xl select-none space-y-6 px-4 py-6"
+      onContextMenu={(event) => {
+        event.preventDefault();
+        setError("Le clic droit est désactivé pendant l'évaluation.");
+      }}
+      onCopy={(event) => event.preventDefault()}
+      onCut={(event) => event.preventDefault()}
+      onPaste={(event) => event.preventDefault()}
+      onDragStart={(event) => event.preventDefault()}
+    >
       <section className="panel overflow-hidden">
         <div className="border-b border-line bg-white px-5 py-5">
           <Image src="/neurorecrut-logo.png" alt="NeuroRecrut" width={210} height={74} className="mb-5 h-auto w-44" priority />
@@ -147,14 +213,23 @@ export function CandidateEvaluationForm({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-2xl font-bold text-ink">Évaluation NeuroRecrut</h2>
-            <p className="text-sm text-gray-600">{saveState}</p>
+            <p className="text-sm text-gray-600">{saveState} · Temps conseillé: {timeLimitMinutes} min</p>
           </div>
-          <p className="text-sm font-semibold text-graphite">{progress}% complété</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`rounded-full px-3 py-1 text-sm font-semibold ${remainingSeconds <= 300 ? "bg-red-50 text-red-700" : "bg-white text-graphite"}`}>
+              {timerLabel}
+            </span>
+            <p className="text-sm font-semibold text-graphite">{progress}% complété</p>
+          </div>
         </div>
         <div className="mt-3 h-2 rounded-full bg-white">
           <div className="h-2 rounded-full bg-teal transition-all" style={{ width: `${progress}%` }} />
         </div>
       </div>
+
+      <p className="rounded-md border border-line bg-white px-4 py-3 text-sm leading-6 text-gray-600">
+        Session chronométrée et protégée: le copier-coller, l&apos;impression, la sélection massive et le clic droit sont désactivés pour limiter les comportements de contournement. Les captures d&apos;écran système ne peuvent pas être bloquées totalement par un navigateur web.
+      </p>
 
       {blocks.map((block) => (
         <section key={block.block_id} className="panel p-5">
@@ -194,7 +269,7 @@ export function CandidateEvaluationForm({
 
       {error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
       <div className="flex justify-end">
-        <button className="btn-primary" type="button" onClick={submit} disabled={isPending}>
+        <button className="btn-primary" type="button" onClick={() => submit(false)} disabled={isPending || timeExpired}>
           {isPending ? "Analyse en cours..." : "Soumettre définitivement"}
         </button>
       </div>

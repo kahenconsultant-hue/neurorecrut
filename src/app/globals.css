@@ -129,6 +129,16 @@ button {
   }
 }
 
+@media (min-width: 768px) {
+  .panel:has(.responsive-table) {
+    overflow-x: auto;
+  }
+
+  .responsive-table {
+    min-width: 960px;
+  }
+}
+
 @media (max-width: 420px) {
   .responsive-table td {
     grid-template-columns: 1fr;

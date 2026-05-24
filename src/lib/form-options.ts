@@ -132,6 +132,13 @@ export const JOB_MANAGER_PROFILE_OPTIONS = [
   "Manager de transformation, à l'aise avec l'ambiguïté, le changement et les priorités mouvantes."
 ];
 
+export const JOB_REPORTING_LINE_OPTIONS = [
+  "Le responsable hiérarchique direct",
+  "Plusieurs interlocuteurs hiérarchiques et fonctionnels",
+  "Le directeur général",
+  "Le client final"
+];
+
 export const JOB_WORK_RHYTHM_OPTIONS = [
   "Rythme stable avec routines, priorités planifiées et suivi régulier des livrables.",
   "Rythme soutenu avec délais courts, forte charge ponctuelle et arbitrages fréquents.",
@@ -195,6 +202,12 @@ export const JOB_CHOICE_GROUPS = [
     label: "Profil manager",
     options: JOB_MANAGER_PROFILE_OPTIONS,
     hint: "Sélectionnez le type de manager avec lequel le candidat travaillera."
+  },
+  {
+    name: "reportingLine",
+    label: "Le/la candidat(e) devra rendre compte à",
+    options: JOB_REPORTING_LINE_OPTIONS,
+    hint: "Précisez à qui la personne devra rendre compte ou avec qui elle devra arbitrer directement."
   },
   {
     name: "managementStyle",

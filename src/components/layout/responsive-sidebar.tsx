@@ -32,7 +32,7 @@ export function ResponsiveSidebar({ homeHref, label, links }: ResponsiveSidebarP
   const pathname = usePathname();
 
   const nav = (
-    <nav className="mt-8 flex flex-1 flex-col gap-1">
+    <nav className="mt-6 flex flex-1 flex-col gap-1 overflow-y-auto pr-1">
       {links.map((link) => {
         const Icon = link.icon;
         const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
@@ -62,7 +62,7 @@ export function ResponsiveSidebar({ homeHref, label, links }: ResponsiveSidebarP
         </button>
       </div>
 
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 border-r border-line bg-white p-5 lg:flex lg:flex-col">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 overflow-y-auto border-r border-line bg-white p-5 lg:flex lg:flex-col">
         <BrandLogo href={homeHref} label={label} compact />
         {nav}
         <LogoutButton />
@@ -76,7 +76,7 @@ export function ResponsiveSidebar({ homeHref, label, links }: ResponsiveSidebarP
             className="absolute inset-0 bg-ink/35"
             onClick={() => setOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-[min(20rem,calc(100vw-2rem))] flex-col border-r border-line bg-white p-5 shadow-2xl">
+          <aside className="absolute inset-y-0 left-0 flex w-[min(20rem,calc(100vw-2rem))] flex-col overflow-y-auto border-r border-line bg-white p-5 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <BrandLogo href={homeHref} label={label} compact />
               <button

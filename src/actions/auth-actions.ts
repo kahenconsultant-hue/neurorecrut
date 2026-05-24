@@ -40,6 +40,8 @@ function normalizeSiren(value: string | null | undefined) {
   return String(value ?? "").replace(/\D/g, "");
 }
 
+const FREE_FIRST_EVALUATION_EXPIRES_AT = new Date("2026-06-15T23:59:59.999+02:00");
+
 export async function registerCompanyUser(_: unknown, formData: FormData) {
   const accountResult = registerSchema.safeParse({
     name: formData.get("name"),
@@ -126,7 +128,8 @@ export async function registerCompanyUser(_: unknown, formData: FormData) {
           creditsPurchased: 1,
           creditsUsed: 0,
           active: true,
-          periodStart: new Date()
+          periodStart: new Date(),
+          periodEnd: FREE_FIRST_EVALUATION_EXPIRES_AT
         }
       });
 

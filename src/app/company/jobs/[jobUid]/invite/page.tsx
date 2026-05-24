@@ -16,7 +16,10 @@ export default async function InvitePage({ params }: { params: { jobUid: string 
     where: {
       companyId: job.companyId,
       active: true,
-      OR: [{ jobId: job.id }, { jobId: null }]
+      OR: [{ periodEnd: null }, { periodEnd: { gt: new Date() } }],
+      AND: [
+        { OR: [{ jobId: job.id }, { jobId: null }] }
+      ]
     }
   });
   const remaining = usableCredits.reduce((sum, item) => sum + item.creditsPurchased - item.creditsUsed, 0);
